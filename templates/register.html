@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - ImmoAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 my-5">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">Inscription</h2>
+                    <p class="text-center text-muted mb-4">Créez votre compte pour commencer à générer des annonces immobilières professionnelles</p>
+                    
+                    <form method="post" action="{{ url_for('register') }}">
+                        <div class="mb-3">
+                            <label for="agency_name" class="form-label">Nom de l'agence</label>
+                            <input type="text" class="form-control" id="agency_name" name="agency_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="form-text">Minimum 8 caractères</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password_confirm" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></label>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p>Vous avez déjà un compte ? <a href="{{ url_for('login') }}">Connectez-vous</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

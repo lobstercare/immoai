@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Oikos - Réinventez votre succès immobilier avec notre propulseur moderne{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">Réinventez votre succès immobilier avec notre propulseur moderne</h1>
+                <p class="hero-subtitle">Oikos utilise l'intelligence artificielle pour générer des descriptions attrayantes, analyser vos photos et créer des annonces qui se démarquent.</p>
+                <div class="d-flex gap-3">
+                    {% if session.get('user') %}
+                    <a href="{{ url_for('new_property') }}" class="btn btn-primary">Créer une annonce</a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Mon tableau de bord</a>
+                    {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">S'inscrire gratuitement</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-dark">Se connecter</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="building-3d-container">
+                    <img src="{{ url_for('static', filename='img/3d-building.svg') }}" alt="Visualisation 3D du parc immobilier" class="building-3d">
+                    <div class="building-shadow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center section-heading mb-5">Nos fonctionnalités</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon rounded-circle mx-auto mb-4">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3 class="card-title h4">Génération IA</h3>
+                        <p class="card-text">Créez des descriptions immobilières professionnelles en quelques secondes grâce à notre intelligence artificielle avancée.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon rounded-circle mx-auto mb-4">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h3 class="card-title h4">Analyse d'images</h3>
+                        <p class="card-text">Notre système analyse automatiquement vos photos pour mettre en valeur les points forts de chaque propriété.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon rounded-circle mx-auto mb-4">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3 class="card-title h4">Export PDF</h3>
+                        <p class="card-text">Exportez vos annonces au format PDF pour les partager facilement avec vos clients ou les imprimer.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center section-heading mb-5">Comment ça marche</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle mx-auto">1</div>
+                    <h3 class="h4">Téléchargez vos photos</h3>
+                    <p>Importez les photos de votre bien immobilier et ajoutez les informations de base.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle mx-auto">2</div>
+                    <h3 class="h4">Notre IA analyse</h3>
+                    <p>Notre intelligence artificielle analyse vos images et génère une description professionnelle.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle mx-auto">3</div>
+                    <h3 class="h4">Exportez votre annonce</h3>
+                    <p>Personnalisez votre annonce et exportez-la au format PDF ou partagez-la directement.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center section-heading mb-5">Ce que disent nos clients</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="testimonial-stars mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text">"Oikos a révolutionné notre façon de créer des annonces. Nous gagnons un temps précieux et nos descriptions sont beaucoup plus professionnelles."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="ms-3">
+                                <h5 class="mb-0">Sophie Martin</h5>
+                                <small class="text-muted">Agence Immobilière Parisienne</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="testimonial-stars mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text">"Nos annonces se démarquent vraiment depuis que nous utilisons Oikos. Les clients sont impressionnés par la qualité des descriptions."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="ms-3">
+                                <h5 class="mb-0">Thomas Dubois</h5>
+                                <small class="text-muted">Immobilier Côte d'Azur</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="testimonial-stars mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="card-text">"Un outil indispensable pour tout agent immobilier moderne. La fonction d'export PDF est particulièrement utile pour nos clients."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="ms-3">
+                                <h5 class="mb-0">Marie Leroy</h5>
+                                <small class="text-muted">Agence Lyon Prestige</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="section-heading">Prêt à transformer vos annonces immobilières ?</h2>
+                <p class="mb-4">Rejoignez les centaines d'agents immobiliers qui utilisent déjà Oikos pour créer des annonces qui se démarquent.</p>
+                {% if session.get('user') %}
+                <a href="{{ url_for('new_property') }}" class="btn btn-primary btn-lg">Créer ma première annonce</a>
+                {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Commencer maintenant</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/3d-building.css') }}">
+<style>
+    .feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 70px;
+        height: 70px;
+    }
+    
+    .step-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    body {
+        font-family: 'Abhaya Libre', sans-serif;
+    }
+    
+    .building-3d-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+    }
+    
+    .building-3d {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .building-shadow {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        background-color: #ccc;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Notre script d'animation SVG -->
+<script src="{{ url_for('static', filename='js/svg-animation.js') }}"></script>
+
+<script>
+    // Initialiser l'animation SVG lorsque la page est chargée
+    document.addEventListener('DOMContentLoaded', function() {
+        initSVGAnimation('.building-3d');
+    });
+</script>
+{% endblock %}

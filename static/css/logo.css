@@ -1,0 +1,101 @@
+/* Styles spécifiques pour le logo Oikos */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+.logo-container {
+  display: inline-block;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  color: #333333;
+  position: relative;
+  display: inline-block;
+  padding: 0 0.2rem;
+  transition: all 0.3s ease;
+}
+
+.logo-text::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #f0d078;
+  transform: scaleX(0.8);
+  transform-origin: left;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.logo-text::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 2px;
+  background: #f0d078;
+  transform: scaleX(0.6);
+  transform-origin: right;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.logo-text:hover::before,
+.logo-text:hover::after {
+  transform: scaleX(1);
+  background: #e6c55c;
+}
+
+.logo-accent {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #f0d078;
+  border-radius: 50%;
+  top: 15%;
+  right: -4px;
+  transition: all 0.3s ease;
+}
+
+.logo-container:hover .logo-accent {
+  transform: scale(1.2);
+  background-color: #e6c55c;
+}
+
+.logo-tagline {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #666666;
+  margin-top: 0.2rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.logo-container:hover .logo-tagline {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .logo-text {
+    font-size: 1.6rem;
+  }
+  
+  .logo-tagline {
+    font-size: 0.6rem;
+  }
+  
+  .logo-accent {
+    width: 6px;
+    height: 6px;
+  }
+}

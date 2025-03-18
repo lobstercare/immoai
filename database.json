@@ -1,0 +1,33 @@
+{
+    "users": {
+        "foncia@gmail.com": {
+            "password": "7ywWD8YxrG8Kbup",
+            "agency_name": "Foncia",
+            "created_at": "2025-03-18T16:12:04.395233"
+        }
+    },
+    "properties": {
+        "8f99381c-e6cf-4382-8993-5f8621f84542": {
+            "title": "Location appartement moderne 2 pi\u00e8ces \u00e0 Noisiel, 41m\u00b2, 970\u20ac/mois",
+            "description": "Bienvenue \u00e0 Noisiel, o\u00f9 ce charmant appartement de 2 pi\u00e8ces est pr\u00eat \u00e0 vous accueillir dans un cadre de vie exceptionnel. Avec ses 41 m\u00b2 astucieusement agenc\u00e9s, cet appartement offre un espace de vie chaleureux et fonctionnel, id\u00e9al pour un couple ou une personne seule en qu\u00eate de confort et de tranquillit\u00e9.\r\n\r\nD\u00e8s que vous franchissez le seuil, vous \u00eates imm\u00e9diatement s\u00e9duit par l'atmosph\u00e8re lumineuse et accueillante qui r\u00e8gne dans chaque pi\u00e8ce. Le salon spacieux est l'endroit parfait pour se d\u00e9tendre apr\u00e8s une longue journ\u00e9e, tandis que la cuisine \u00e9quip\u00e9e vous invite \u00e0 exprimer votre talent culinaire.\r\n\r\nLa chambre \u00e0 coucher, baign\u00e9e de lumi\u00e8re naturelle, offre un havre de paix propice \u00e0 des nuits r\u00e9paratrices. La salle de bains moderne compl\u00e8te cet ensemble harmonieux.\r\n\r\nSituation privil\u00e9gi\u00e9e \u00e0 Noisiel, cette adresse vous offre un acc\u00e8s facile aux commodit\u00e9s de la vie quotidienne, des commerces aux transports en commun. Le loyer mensuel de 970\u20ac inclut \u00e9galement des charges pour une gestion simplifi\u00e9e.\r\n\r\nNe manquez pas cette opportunit\u00e9 unique de vivre dans un appartement \u00e0 l'ambiance cosy et contemporaine. Contactez-nous d\u00e8s aujourd'hui pour organiser une visite et laissez-vous s\u00e9duire par ce bijou immobilier \u00e0 Noisiel.",
+            "enhanced_description": "Bienvenue \u00e0 Noisiel, o\u00f9 ce charmant appartement de 2 pi\u00e8ces est pr\u00eat \u00e0 vous accueillir dans un cadre de vie exceptionnel. Avec ses 41 m\u00b2 astucieusement agenc\u00e9s, cet appartement offre un espace de vie chaleureux et fonctionnel, id\u00e9al pour un couple ou une personne seule en qu\u00eate de confort et de tranquillit\u00e9.\r\n\r\nD\u00e8s que vous franchissez le seuil, vous \u00eates imm\u00e9diatement s\u00e9duit par l'atmosph\u00e8re lumineuse et accueillante qui r\u00e8gne dans chaque pi\u00e8ce. Le salon spacieux est l'endroit parfait pour se d\u00e9tendre apr\u00e8s une longue journ\u00e9e, tandis que la cuisine \u00e9quip\u00e9e vous invite \u00e0 exprimer votre talent culinaire.\r\n\r\nLa chambre \u00e0 coucher, baign\u00e9e de lumi\u00e8re naturelle, offre un havre de paix propice \u00e0 des nuits r\u00e9paratrices. La salle de bains moderne compl\u00e8te cet ensemble harmonieux.\r\n\r\nSituation privil\u00e9gi\u00e9e \u00e0 Noisiel, cette adresse vous offre un acc\u00e8s facile aux commodit\u00e9s de la vie quotidienne, des commerces aux transports en commun. Le loyer mensuel de 970\u20ac inclut \u00e9galement des charges pour une gestion simplifi\u00e9e.\r\n\r\nNe manquez pas cette opportunit\u00e9 unique de vivre dans un appartement \u00e0 l'ambiance cosy et contemporaine. Contactez-nous d\u00e8s aujourd'hui pour organiser une visite et laissez-vous s\u00e9duire par ce bijou immobilier \u00e0 Noisiel.",
+            "property_type": "Appartement",
+            "transaction_type": "rent",
+            "price": "970",
+            "area": "41",
+            "rooms": "2",
+            "address": "04 All\u00e9e buissonni\u00e8re",
+            "city": "Noisiel",
+            "postal_code": "77186",
+            "images": [
+                "uploads\\properties\\8f99381c-e6cf-4382-8993-5f8621f84542\\0_image_2025-03-18_174810777.png"
+            ],
+            "dpe_file": null,
+            "owner": "foncia@gmail.com",
+            "agency_name": "Foncia",
+            "created_at": "2025-03-18T17:42:56.678484",
+            "status": "active",
+            "updated_at": "2025-03-18T17:48:13.770512"
+        }
+    }
+}

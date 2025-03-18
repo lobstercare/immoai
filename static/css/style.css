@@ -1,0 +1,493 @@
+/* Main Styles for ImmoAI */
+
+/* Import de polices élégantes */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root {
+    --primary-color: #f0d078;
+    --secondary-color: #333333;
+    --text-color: #333333;
+    --light-text-color: #666666;
+    --background-color: #ffffff;
+    --light-background: #f9f7f2;
+    --accent-color: #e6c55c;
+}
+
+/* General Styles */
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: var(--secondary-color);
+    letter-spacing: -0.02em;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+/* Logo styling */
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-size: 1.8rem;
+    color: var(--secondary-color);
+    position: relative;
+    padding-bottom: 3px;
+}
+
+.logo-text:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--secondary-color);
+    transform: scaleX(0.7);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.logo-text:hover:after {
+    transform: scaleX(1);
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--primary-color) !important;
+    padding: 1rem 0;
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+    color: var(--secondary-color) !important;
+}
+
+.nav-link {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem !important;
+    margin: 0 0.2rem;
+    position: relative;
+}
+
+.nav-link:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background: var(--secondary-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover:after {
+    transform: scaleX(1);
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.5rem;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-primary:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--accent-color);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn-primary:hover:before {
+    left: 0;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 0;
+    border: none;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+/* Custom Container Padding */
+.container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+/* Feature Icons */
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+    border-radius: 50%;
+}
+
+/* Step Circles */
+.step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 auto 1.5rem;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 120px 0;
+    background-color: var(--light-background);
+}
+
+/* Property Card */
+.property-card {
+    height: 100%;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.property-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.property-card .card-body {
+    padding: 1.5rem;
+}
+
+.property-card .property-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.property-card .property-location {
+    color: var(--light-text-color);
+    font-size: 0.875rem;
+}
+
+.property-card .property-features {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.property-card .feature-item {
+    display: flex;
+    align-items: center;
+}
+
+.property-card .feature-icon {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* Dashboard Stats */
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-label {
+    color: var(--light-text-color);
+    font-size: 1rem;
+}
+
+/* Property Preview */
+.carousel-item img {
+    height: 500px;
+    object-fit: cover;
+}
+
+.property-details {
+    padding: 2rem;
+}
+
+.property-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.property-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.property-feature {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.property-feature i {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+/* Map Container */
+.map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* DPE Display */
+.dpe-container {
+    background-color: var(--light-background);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+/* Image Upload Preview */
+.image-preview {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Footer */
+footer {
+    background-color: var(--light-background);
+    color: var(--text-color);
+    padding: 60px 0 30px;
+}
+
+footer h5 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+footer a {
+    color: var(--light-text-color);
+}
+
+footer a:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .carousel-item img {
+        height: 300px;
+    }
+    
+    .property-title {
+        font-size: 1.5rem;
+    }
+    
+    .property-price {
+        font-size: 1.25rem;
+    }
+    
+    .map-container {
+        height: 300px;
+    }
+}
+
+/* Animation for Loading */
+.loading-spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25rem solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* AI Generated Content Styling */
+.ai-generated {
+    background-color: #f0f7ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+}
+
+/* Tooltip Styling */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Style spécifique pour les sections */
+.py-5 {
+    padding-top: 5rem !important;
+    padding-bottom: 5rem !important;
+}
+
+/* Style pour les témoignages */
+.testimonial-stars {
+    color: var(--accent-color);
+}
+
+/* Style pour le formulaire */
+.form-control {
+    border-radius: 0;
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(240, 208, 120, 0.25);
+}
+
+/* Style pour les images */
+.img-thumbnail {
+    border-color: var(--primary-color);
+    border-radius: 0;
+}
+
+/* Animation douce pour les transitions */
+a, button, .card {
+    transition: all 0.3s ease;
+}
+
+/* Headings with elegant underlines */
+.section-heading {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.section-heading:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: var(--primary-color);
+}
+
+/* Custom styling for hero text */
+.hero-title {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    color: var(--light-text-color);
+}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annonce Immobilière - {{ property.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .agency-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .property-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .property-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0d6efd;
+            margin-bottom: 15px;
+        }
+        .property-address {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .property-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .detail-item {
+            text-align: center;
+        }
+        .detail-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .detail-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .property-description {
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #0d6efd;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .property-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .property-image {
+            width: 48%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .map-container {
+            margin-bottom: 30px;
+            height: 300px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+        .dpe-container {
+            margin-bottom: 30px;
+        }
+        .dpe-image {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .export-info {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="agency-name">{{ agency_name }}</div>
+            <div class="export-info">Document généré le {{ export_date }}</div>
+        </div>
+        
+        <div class="property-title">{{ property.title }}</div>
+        <div class="property-price">
+            {% if property.transaction_type == 'sale' %}
+                {{ property.price }}€
+            {% else %}
+                {{ property.price }}€/mois
+            {% endif %}
+        </div>
+        <div class="property-address">
+            {{ property.address }}, {{ property.postal_code }} {{ property.city }}
+        </div>
+        
+        <div class="property-details">
+            <div class="detail-item">
+                <div class="detail-value">{{ property.property_type }}</div>
+                <div class="detail-label">Type de bien</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-value">{{ property.area }} m²</div>
+                <div class="detail-label">Surface</div>
+            </div>
+            {% if property.rooms %}
+            <div class="detail-item">
+                <div class="detail-value">{{ property.rooms }} pièce{% if property.rooms|int > 1 %}s{% endif %}</div>
+                <div class="detail-label">Pièces</div>
+            </div>
+            {% endif %}
+            <div class="detail-item">
+                <div class="detail-value">
+                    {% if property.transaction_type == 'sale' %}
+                        Vente
+                    {% else %}
+                        Location
+                    {% endif %}
+                </div>
+                <div class="detail-label">Transaction</div>
+            </div>
+        </div>
+        
+        <div class="section-title">Description</div>
+        <div class="property-description">
+            {% if property.enhanced_description %}
+                {{ property.enhanced_description|replace('\n', '<br>')|safe }}
+            {% else %}
+                {{ property.description|replace('\n', '<br>')|safe }}
+            {% endif %}
+        </div>
+        
+        {% if property.images %}
+        <div class="section-title">Photos</div>
+        <div class="property-images">
+            {% for image in property.images[:4] %}
+            <img src="file:///{{ image }}" class="property-image" alt="Photo du bien">
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if property.dpe_file %}
+        <div class="section-title">Diagnostic de Performance Énergétique</div>
+        <div class="dpe-container">
+            <img src="file:///{{ property.dpe_file }}" class="dpe-image" alt="DPE">
+        </div>
+        {% endif %}
+        
+        <div class="section-title">Localisation</div>
+        <div class="map-container">
+            {{ map_html|safe }}
+        </div>
+        
+        <div class="footer">
+            <p>{{ agency_name }} - Document généré par ImmoAI</p>
+            <p>Ce document est une présentation non contractuelle du bien immobilier.</p>
+            <p>Pour plus d'informations, contactez l'agence.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - ImmoAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Tableau de bord</h1>
+        <a href="{{ url_for('new_property') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nouvelle annonce
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="p-4 bg-light">
+                <h2 class="h4 mb-0">Bienvenue, {{ session.get('agency_name', 'Utilisateur') }} !</h2>
+            </div>
+            <div class="p-4">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="display-4 mb-2">{{ properties|length }}</div>
+                                <h3 class="h5">Annonces actives</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="display-4 mb-2">0</div>
+                                <h3 class="h5">Visites cette semaine</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="display-4 mb-2">0</div>
+                                <h3 class="h5">Contacts reçus</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h2 class="h5 mb-0">Mes annonces</h2>
+        </div>
+        <div class="card-body p-0">
+            {% if properties %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Titre</th>
+                                <th>Type</th>
+                                <th>Prix</th>
+                                <th>Ville</th>
+                                <th>Date de création</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for property in properties %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('property_preview', property_id=property.id) }}" class="text-decoration-none">
+                                        {{ property.title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if property.transaction_type == 'sale' %}
+                                        <span class="badge bg-primary">Vente</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Location</span>
+                                    {% endif %}
+                                    {{ property.property_type }}
+                                </td>
+                                <td>{{ property.price }} €</td>
+                                <td>{{ property.city }}</td>
+                                <td>{{ property.created_at.split('T')[0] }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('property_preview', property_id=property.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('edit_property', property_id=property.id) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ property.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal{{ property.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirmer la suppression</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Êtes-vous sûr de vouloir supprimer l'annonce "{{ property.title }}" ?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <form action="{{ url_for('delete_property', property_id=property.id) }}" method="post">
+                                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-home fa-4x text-muted"></i>
+                    </div>
+                    <h3 class="h5 mb-3">Vous n'avez pas encore d'annonces</h3>
+                    <p class="text-muted mb-4">Créez votre première annonce immobilière en quelques clics</p>
+                    <a href="{{ url_for('new_property') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Créer une annonce
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

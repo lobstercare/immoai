@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+
+{% block title %}Nouvelle annonce - ImmoAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-4">
+        <h1>Créer une nouvelle annonce</h1>
+        <p class="text-muted">Remplissez les informations ci-dessous pour générer une annonce professionnelle</p>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-body p-4">
+            <form method="post" action="{{ url_for('new_property') }}" enctype="multipart/form-data" id="propertyForm">
+                <div class="row">
+                    <!-- Informations générales -->
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Informations générales</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="property_type" class="form-label">Type de bien *</label>
+                                <select class="form-select" id="property_type" name="property_type" required>
+                                    <option value="" selected disabled>Sélectionner...</option>
+                                    <option value="Appartement">Appartement</option>
+                                    <option value="Maison">Maison</option>
+                                    <option value="Studio">Studio</option>
+                                    <option value="Loft">Loft</option>
+                                    <option value="Duplex">Duplex</option>
+                                    <option value="Terrain">Terrain</option>
+                                    <option value="Local commercial">Local commercial</option>
+                                    <option value="Bureau">Bureau</option>
+                                    <option value="Parking">Parking</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="transaction_type" class="form-label">Type de transaction *</label>
+                                <select class="form-select" id="transaction_type" name="transaction_type" required>
+                                    <option value="" selected disabled>Sélectionner...</option>
+                                    <option value="sale">Vente</option>
+                                    <option value="rent">Location</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Prix *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="price" name="price" required>
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="area" class="form-label">Surface *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="area" name="area" required>
+                                    <span class="input-group-text">m²</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="rooms" class="form-label">Nombre de pièces</label>
+                                <input type="number" class="form-control" id="rooms" name="rooms">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="bedrooms" class="form-label">Nombre de chambres</label>
+                                <input type="number" class="form-control" id="bedrooms" name="bedrooms">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Adresse *</label>
+                            <input type="text" class="form-control" id="address" name="address" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="postal_code" class="form-label">Code postal *</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">Ville *</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description et médias -->
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Description</h3>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description du bien</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Décrivez le bien en quelques phrases. Notre IA améliorera votre texte."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div id="ai-description-preview" class="p-3 bg-light rounded mb-3" style="display: none;">
+                                <h6 class="mb-2">Aperçu de la description générée par IA</h6>
+                                <div id="ai-description-content" class="font-italic"></div>
+                            </div>
+                            <button type="button" id="generate-description" class="btn btn-outline-primary">
+                                <i class="fas fa-magic me-2"></i>Générer une description avec l'IA
+                            </button>
+                        </div>
+                        
+                        <div class="mb-3 mt-4">
+                            <label for="title" class="form-label">Titre de l'annonce *</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="title" name="title" required>
+                                <button type="button" id="suggest-titles" class="btn btn-outline-primary" disabled>
+                                    <i class="fas fa-lightbulb me-1"></i> Suggestions
+                                </button>
+                            </div>
+                            <div id="title-suggestions" class="mt-2" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <span>Suggestions de titres</span>
+                                        <button type="button" class="btn-close" aria-label="Close" id="close-suggestions"></button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3" id="suggestions-loading" style="display: none !important;">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                <span class="visually-hidden">Chargement...</span>
+                                            </div>
+                                            <span>Génération des suggestions...</span>
+                                        </div>
+                                        <ul class="list-group list-group-flush" id="suggestions-list">
+                                            <!-- Les suggestions seront ajoutées ici -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">Complétez les informations et la description ci-dessus puis cliquez sur "Suggestions" pour générer des titres attractifs</small>
+                        </div>
+                        
+                        <h3 class="h5 mb-3 mt-4">Photos et documents</h3>
+                        
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Photos du bien</label>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                                <label class="input-group-text" for="images">Télécharger</label>
+                            </div>
+                            <div class="form-text">Sélectionnez plusieurs photos pour un meilleur résultat. L'IA analysera automatiquement vos photos.</div>
+                            
+                            <div id="image-preview-container" class="row mt-3">
+                                <!-- Les aperçus des images seront ajoutés ici par JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dpe" class="form-label">Diagnostic de Performance Énergétique (DPE)</label>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="dpe" name="dpe" accept="image/*">
+                                <label class="input-group-text" for="dpe">Télécharger</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check me-2"></i>Créer l'annonce
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aperçu des images
+        const imageInput = document.getElementById('images');
+        const previewContainer = document.getElementById('image-preview-container');
+        
+        imageInput.addEventListener('change', function() {
+            // Ne pas réinitialiser le conteneur pour permettre l'ajout de plusieurs photos
+            // previewContainer.innerHTML = '';
+            
+            if (this.files) {
+                // Afficher toutes les images (pas de limite à 6)
+                Array.from(this.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const card = document.createElement('div');
+                        card.className = 'col-md-4 mb-3';
+                        card.innerHTML = `
+                            <div class="card position-relative">
+                                <img src="${e.target.result}" class="card-img-top" alt="Aperçu de l'image">
+                                <div class="card-body p-2">
+                                    <div class="small text-muted">${file.name}</div>
+                                    <div class="analysis-status mt-1">
+                                        <div class="d-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                <span class="visually-hidden">Analyse en cours...</span>
+                                            </div>
+                                            <span class="small">Analyse en cours...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        previewContainer.appendChild(card);
+                        
+                        // Ajouter un gestionnaire d'événements pour supprimer l'image
+                        card.querySelector('.remove-image').addEventListener('click', function() {
+                            card.remove();
+                        });
+                        
+                        // Analyser l'image avec l'IA
+                        const analysisStatus = card.querySelector('.analysis-status');
+                        analyzeImage(file, card, analysisStatus);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+                
+                // Réinitialiser l'input pour permettre de sélectionner à nouveau les mêmes fichiers
+                imageInput.value = '';
+            }
+        });
+        
+        // Génération de description
+        const generateDescriptionBtn = document.getElementById('generate-description');
+        const descriptionInput = document.getElementById('description');
+        const aiDescriptionPreview = document.getElementById('ai-description-preview');
+        const aiDescriptionContent = document.getElementById('ai-description-content');
+        
+        generateDescriptionBtn.addEventListener('click', function() {
+            const propertyType = document.getElementById('property_type').value;
+            const transactionType = document.getElementById('transaction_type').value;
+            const price = document.getElementById('price').value;
+            const area = document.getElementById('area').value;
+            const rooms = document.getElementById('rooms').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            const city = document.getElementById('city').value;
+            const userDescription = descriptionInput.value;
+            
+            // Vérifier les champs requis
+            if (!propertyType || !area || !city) {
+                alert('Veuillez remplir au moins le type de bien, la surface et la ville pour générer une description.');
+                return;
+            }
+            
+            // Afficher un état de chargement
+            generateDescriptionBtn.disabled = true;
+            generateDescriptionBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Génération en cours...';
+            
+            // Appel à l'API pour générer la description
+            fetch('/api/generate-description', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    property_type: propertyType,
+                    transaction_type: transactionType,
+                    price: price,
+                    area: area,
+                    rooms: rooms,
+                    bedrooms: bedrooms,
+                    location: city,
+                    user_description: userDescription
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.description) {
+                    // Afficher la description générée
+                    aiDescriptionContent.textContent = data.description;
+                    aiDescriptionPreview.style.display = 'block';
+                    descriptionInput.value = data.description;
+                    
+                    // Activer le bouton de suggestion de titre une fois la description générée
+                    checkRequiredFieldsForSuggestions();
+                } else {
+                    alert('Erreur lors de la génération de la description.');
+                }
+                
+                // Réinitialiser le bouton
+                generateDescriptionBtn.disabled = false;
+                generateDescriptionBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Générer une description avec l\'IA';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la génération de la description.');
+                
+                // Réinitialiser le bouton
+                generateDescriptionBtn.disabled = false;
+                generateDescriptionBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Générer une description avec l\'IA';
+            });
+        });
+        
+        // Fonction pour analyser une image
+        function analyzeImage(file, card, analysisStatus) {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            // Ajouter une image à la liste des images à envoyer
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'image_list[]';
+            hiddenInput.value = file.name;
+            document.getElementById('propertyForm').appendChild(hiddenInput);
+            
+            // Définir un timeout pour l'analyse
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout')), 10000); // 10 secondes timeout
+            });
+            
+            // Faire la requête avec un timeout
+            Promise.race([
+                fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                }),
+                timeoutPromise
+            ])
+            .then(response => response.json())
+            .then(data => {
+                // Créer un badge pour le type de pièce
+                const badge = document.createElement('div');
+                badge.className = 'position-absolute top-0 start-0 m-2 badge bg-primary';
+                badge.textContent = data.room_type || 'Non identifié';
+                card.appendChild(badge);
+                
+                // Afficher les caractéristiques
+                let featuresHtml = '';
+                if (data.features && data.features.length > 0) {
+                    featuresHtml = data.features.map(f => `<span class="badge bg-light text-dark me-1">${f}</span>`).join('');
+                }
+                
+                // Afficher la description
+                analysisStatus.innerHTML = `
+                    <div class="mt-1">
+                        <div class="small text-success mb-1"><i class="fas fa-check-circle me-1"></i> Analyse terminée</div>
+                        <div class="small text-muted">${data.description || 'Aucune description disponible'}</div>
+                        <div class="mt-1">${featuresHtml}</div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                analysisStatus.innerHTML = `
+                    <div class="mt-1">
+                        <div class="small text-warning mb-1"><i class="fas fa-exclamation-triangle me-1"></i> Analyse partielle</div>
+                        <div class="small text-muted">L'image sera utilisée mais n'a pas pu être analysée complètement.</div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Suggestions de titres
+        const suggestTitlesBtn = document.getElementById('suggest-titles');
+        const titleInput = document.getElementById('title');
+        const suggestionsContainer = document.getElementById('title-suggestions');
+        const suggestionsList = document.getElementById('suggestions-list');
+        const closeSuggestionsBtn = document.getElementById('close-suggestions');
+        const suggestionsLoading = document.getElementById('suggestions-loading');
+        
+        // Fonction pour vérifier si les champs requis pour la suggestion sont remplis
+        function checkRequiredFieldsForSuggestions() {
+            const propertyType = document.getElementById('property_type').value;
+            const area = document.getElementById('area').value;
+            const city = document.getElementById('city').value;
+            const description = document.getElementById('description').value;
+            
+            if (propertyType && area && city) {
+                suggestTitlesBtn.disabled = false;
+            } else {
+                suggestTitlesBtn.disabled = true;
+            }
+        }
+        
+        // Ajouter des écouteurs d'événements pour les champs requis
+        document.getElementById('property_type').addEventListener('change', checkRequiredFieldsForSuggestions);
+        document.getElementById('area').addEventListener('input', checkRequiredFieldsForSuggestions);
+        document.getElementById('city').addEventListener('input', checkRequiredFieldsForSuggestions);
+        document.getElementById('description').addEventListener('input', checkRequiredFieldsForSuggestions);
+        
+        // Vérifier l'état initial
+        checkRequiredFieldsForSuggestions();
+        
+        suggestTitlesBtn.addEventListener('click', function() {
+            const propertyType = document.getElementById('property_type').value;
+            const transactionType = document.getElementById('transaction_type').value;
+            const price = document.getElementById('price').value;
+            const area = document.getElementById('area').value;
+            const rooms = document.getElementById('rooms').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            const city = document.getElementById('city').value;
+            const description = document.getElementById('description').value;
+            
+            // Afficher un état de chargement
+            suggestionsLoading.style.display = 'flex';
+            suggestionsList.innerHTML = '';
+            suggestionsContainer.style.display = 'block';
+            
+            // Appel à l'API pour générer les suggestions de titres
+            fetch('/api/generate-title-suggestions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    property_type: propertyType,
+                    transaction_type: transactionType,
+                    price: price,
+                    area: area,
+                    rooms: rooms,
+                    bedrooms: bedrooms,
+                    location: city,
+                    description: description,
+                    features: []
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.titles) {
+                    data.titles.forEach(title => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.textContent = title;
+                        listItem.addEventListener('click', function() {
+                            titleInput.value = title;
+                            suggestionsContainer.style.display = 'none';
+                        });
+                        suggestionsList.appendChild(listItem);
+                    });
+                } else {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item text-danger';
+                    listItem.textContent = 'Erreur lors de la génération des suggestions';
+                    suggestionsList.appendChild(listItem);
+                }
+                suggestionsLoading.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item text-danger';
+                listItem.textContent = 'Erreur lors de la génération des suggestions';
+                suggestionsList.appendChild(listItem);
+                suggestionsLoading.style.display = 'none';
+            });
+        });
+        
+        closeSuggestionsBtn.addEventListener('click', function() {
+            suggestionsContainer.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

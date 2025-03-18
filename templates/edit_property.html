@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier l'annonce - ImmoAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Tableau de bord</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('property_preview', property_id=property_id) }}">Aperçu de l'annonce</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="mb-4">
+        <h1>Modifier l'annonce</h1>
+        <p class="text-muted">Mettez à jour les informations de votre annonce</p>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-body p-4">
+            <form method="post" action="{{ url_for('edit_property', property_id=property_id) }}" enctype="multipart/form-data" id="propertyForm">
+                <div class="row">
+                    <!-- Informations générales -->
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Informations générales</h3>
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titre de l'annonce *</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ property.title }}" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="property_type" class="form-label">Type de bien *</label>
+                                <select class="form-select" id="property_type" name="property_type" required>
+                                    <option value="" disabled>Sélectionner...</option>
+                                    <option value="Appartement" {% if property.property_type == 'Appartement' %}selected{% endif %}>Appartement</option>
+                                    <option value="Maison" {% if property.property_type == 'Maison' %}selected{% endif %}>Maison</option>
+                                    <option value="Studio" {% if property.property_type == 'Studio' %}selected{% endif %}>Studio</option>
+                                    <option value="Loft" {% if property.property_type == 'Loft' %}selected{% endif %}>Loft</option>
+                                    <option value="Duplex" {% if property.property_type == 'Duplex' %}selected{% endif %}>Duplex</option>
+                                    <option value="Terrain" {% if property.property_type == 'Terrain' %}selected{% endif %}>Terrain</option>
+                                    <option value="Local commercial" {% if property.property_type == 'Local commercial' %}selected{% endif %}>Local commercial</option>
+                                    <option value="Bureau" {% if property.property_type == 'Bureau' %}selected{% endif %}>Bureau</option>
+                                    <option value="Parking" {% if property.property_type == 'Parking' %}selected{% endif %}>Parking</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="transaction_type" class="form-label">Type de transaction *</label>
+                                <select class="form-select" id="transaction_type" name="transaction_type" required>
+                                    <option value="" disabled>Sélectionner...</option>
+                                    <option value="sale" {% if property.transaction_type == 'sale' %}selected{% endif %}>Vente</option>
+                                    <option value="rent" {% if property.transaction_type == 'rent' %}selected{% endif %}>Location</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Prix *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="price" name="price" value="{{ property.price }}" required>
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="area" class="form-label">Surface *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="area" name="area" value="{{ property.area }}" required>
+                                    <span class="input-group-text">m²</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rooms" class="form-label">Nombre de pièces</label>
+                            <input type="number" class="form-control" id="rooms" name="rooms" min="1" value="{{ property.rooms }}">
+                        </div>
+                        
+                        <h3 class="h5 mb-3 mt-4">Localisation</h3>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Adresse *</label>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ property.address }}" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="postal_code" class="form-label">Code postal *</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ property.postal_code }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">Ville *</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ property.city }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description et médias -->
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Description</h3>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description du bien</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Décrivez le bien en quelques phrases. Notre IA améliorera votre texte.">{{ property.description }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div id="ai-description-preview" class="p-3 bg-light rounded mb-3" {% if property.enhanced_description %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                                <h6 class="mb-2">Description générée par IA</h6>
+                                <div id="ai-description-content" class="font-italic">
+                                    {% if property.enhanced_description %}
+                                        {{ property.enhanced_description|replace('\n', '<br>')|safe }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <button type="button" id="generate-description" class="btn btn-outline-primary">
+                                <i class="fas fa-magic me-2"></i>Régénérer la description avec l'IA
+                            </button>
+                        </div>
+                        
+                        <h3 class="h5 mb-3 mt-4">Photos et documents</h3>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Photos actuelles</label>
+                            <div class="row">
+                                {% for image in property.images %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <img src="{{ url_for('static', filename=image) }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Ajouter de nouvelles photos</label>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                                <label class="input-group-text" for="images">Télécharger</label>
+                            </div>
+                            <div class="form-text">Les nouvelles photos seront ajoutées aux photos existantes.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dpe" class="form-label">Diagnostic de Performance Énergétique (DPE)</label>
+                            {% if property.dpe_file %}
+                            <div class="mb-2">
+                                <img src="{{ url_for('static', filename=property.dpe_file) }}" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                            {% endif %}
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="dpe" name="dpe" accept="image/*">
+                                <label class="input-group-text" for="dpe">Télécharger</label>
+                            </div>
+                            <div class="form-text">Laissez vide pour conserver le DPE actuel.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('property_preview', property_id=property_id) }}" class="btn btn-outline-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Générer une description avec l'IA
+        const generateBtn = document.getElementById('generate-description');
+        const descriptionInput = document.getElementById('description');
+        const aiPreview = document.getElementById('ai-description-preview');
+        const aiContent = document.getElementById('ai-description-content');
+        
+        generateBtn.addEventListener('click', function() {
+            const propertyType = document.getElementById('property_type').value;
+            const area = document.getElementById('area').value;
+            const rooms = document.getElementById('rooms').value;
+            const city = document.getElementById('city').value;
+            
+            if (!descriptionInput.value) {
+                alert('Veuillez d\'abord saisir une description de base');
+                return;
+            }
+            
+            // Afficher un état de chargement
+            aiContent.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Génération en cours...</div>';
+            aiPreview.style.display = 'block';
+            
+            // Appel à l'API pour générer la description
+            fetch('/api/generate-description', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    basic_info: descriptionInput.value,
+                    property_type: propertyType,
+                    area: area,
+                    rooms: rooms,
+                    city: city
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.enhanced_description) {
+                    aiContent.innerHTML = data.enhanced_description.replace(/\n/g, '<br>');
+                } else {
+                    aiContent.innerHTML = '<div class="text-danger">Erreur lors de la génération de la description</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                aiContent.innerHTML = '<div class="text-danger">Erreur lors de la génération de la description</div>';
+            });
+        });
+    });
+</script>
+{% endblock %}
