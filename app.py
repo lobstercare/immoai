@@ -4,60 +4,66 @@ import json
 import uuid
 from datetime import datetime
 from werkzeug.utils import secure_filename
-import cv2
-import numpy as np
-from PIL import Image
-import folium
-import io
 import base64
-import requests
+from openai import OpenAI
 from dotenv import load_dotenv
-import openai
-from flask import send_file
-import pdfkit
-from jinja2 import Environment, FileSystemLoader
-import re
-from geopy.geocoders import Nominatim
 
-# Charger les variables d'environnement
+# Load environment variables
 load_dotenv()
 
-# Configuration de l'API OpenAI
-openai_api_key = os.getenv("OPENAI_API_KEY")
-if not openai_api_key:
-    print("ATTENTION: Clé API OpenAI non trouvée dans le fichier .env")
-else:
-    openai.api_key = openai_api_key
+# Set up OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Test API key validity without blocking app startup
+def test_openai_connection():
+    try:
+        # Just a simple API call to test connectivity
+        client.models.list()
+        return True
+    except Exception as e:
+        print(f"Warning: OpenAI API connection issue: {str(e)}")
+        return False
+
+# Check connection but don't block startup
+api_connected = test_openai_connection()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev_key_for_testing")
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
-# Créer le dossier d'uploads s'il n'existe pas
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'dpe'), exist_ok=True)
-os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'properties'), exist_ok=True)
+# Upload configuration
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 
-# Base de données simulée (dans un vrai projet, utilisez une base de données)
-DATABASE_FILE = 'database.json'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+# Create upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Database functions
 def get_database():
-    if not os.path.exists(DATABASE_FILE):
-        with open(DATABASE_FILE, 'w') as f:
-            json.dump({"users": {}, "properties": {}}, f)
-    
-    with open(DATABASE_FILE, 'r') as f:
-        return json.load(f)
+    """Load the database from the JSON file or create a new one if it doesn't exist."""
+    db_path = os.path.join(os.path.dirname(__file__), 'database.json')
+    if os.path.exists(db_path):
+        with open(db_path, 'r') as f:
+            return json.load(f)
+    else:
+        # Create a new database structure
+        return {
+            'users': {},
+            'properties': [],
+            'next_property_id': 1
+        }
 
-def save_database(data):
-    with open(DATABASE_FILE, 'w') as f:
-        json.dump(data, f, indent=4)
+def save_database(db):
+    """Save the database to the JSON file."""
+    db_path = os.path.join(os.path.dirname(__file__), 'database.json')
+    with open(db_path, 'w') as f:
+        json.dump(db, f, indent=4)
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -151,8 +157,10 @@ def new_property():
             return redirect(url_for('new_property'))
         
         # Générer un ID unique pour la propriété
-        property_id = str(uuid.uuid4())
-        property_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'properties', property_id)
+        db = get_database()
+        property_id = db['next_property_id']
+        db['next_property_id'] += 1
+        property_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'properties', str(property_id))
         os.makedirs(property_folder, exist_ok=True)
         
         # Traiter les images
@@ -166,7 +174,7 @@ def new_property():
                             filename = secure_filename(f"{i}_{file.filename}")
                             filepath = os.path.join(property_folder, filename)
                             file.save(filepath)
-                            images.append(os.path.join('uploads', 'properties', property_id, filename))
+                            images.append(os.path.join('uploads', 'properties', str(property_id), filename))
                         except Exception as e:
                             print(f"Erreur lors du traitement de l'image {file.filename}: {str(e)}")
                             # Continuer avec les autres images
@@ -190,20 +198,10 @@ def new_property():
         
         # Créer l'entrée dans la base de données
         try:
-            # Analyser les images et générer une description améliorée si possible
-            enhanced_description = description
-            try:
-                if images:
-                    enhanced_description = generate_enhanced_description(description, images, property_type, area, rooms, city)
-            except Exception as e:
-                print(f"Erreur lors de la génération de la description améliorée: {str(e)}")
-                # Utiliser la description originale en cas d'erreur
-            
-            db = get_database()
-            db['properties'][property_id] = {
+            db['properties'].append({
+                'id': property_id,
                 'title': title,
                 'description': description,
-                'enhanced_description': enhanced_description,
                 'property_type': property_type,
                 'transaction_type': transaction_type,
                 'price': price,
@@ -218,7 +216,7 @@ def new_property():
                 'agency_name': session.get('agency_name', ''),
                 'created_at': datetime.now().isoformat(),
                 'status': 'active'
-            }
+            })
             save_database(db)
             
             flash('Annonce créée avec succès!', 'success')
@@ -237,11 +235,13 @@ def property_preview(property_id):
         return redirect(url_for('login'))
     
     db = get_database()
-    if property_id not in db['properties']:
+    for prop in db['properties']:
+        if prop['id'] == int(property_id):
+            property_data = prop
+            break
+    else:
         flash('Propriété non trouvée', 'danger')
         return redirect(url_for('dashboard'))
-    
-    property_data = db['properties'][property_id]
     
     # Vérifier si l'utilisateur est le propriétaire
     is_owner = property_data['owner'] == session['user']
@@ -271,11 +271,17 @@ def edit_property(property_id):
         return redirect(url_for('login'))
     
     db = get_database()
-    if property_id not in db['properties'] or db['properties'][property_id]['owner'] != session['user']:
+    for prop in db['properties']:
+        if prop['id'] == int(property_id):
+            property_data = prop
+            break
+    else:
         flash('Vous n\'avez pas accès à cette propriété', 'danger')
         return redirect(url_for('dashboard'))
     
-    property_data = db['properties'][property_id]
+    if property_data['owner'] != session['user']:
+        flash('Vous n\'avez pas accès à cette propriété', 'danger')
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         # Mettre à jour les données de la propriété
@@ -306,7 +312,7 @@ def edit_property(property_id):
             
             # Ajouter les nouvelles images
             for file in files:
-                if file and allowed_file(file.filename) and file.filename:
+                if file and file.filename and allowed_file(file.filename):
                     filename = secure_filename(f"{next_image_num}_{file.filename}")
                     filepath = os.path.join(property_folder, filename)
                     file.save(filepath)
@@ -329,23 +335,14 @@ def edit_property(property_id):
                 file.save(filepath)
                 property_data['dpe_file'] = os.path.join('uploads', 'dpe', filename)
         
-        # Mettre à jour la description améliorée si la description a changé
-        if request.form.get('regenerate_description', 'off') == 'on' or not property_data.get('enhanced_description'):
-            enhanced_description = generate_enhanced_description(
-                property_data['description'], 
-                property_data['images'], 
-                property_data['property_type'], 
-                property_data['area'], 
-                property_data['rooms'], 
-                property_data['city']
-            )
-            property_data['enhanced_description'] = enhanced_description
-        
         # Mettre à jour la date de modification
         property_data['updated_at'] = datetime.now().isoformat()
         
         # Sauvegarder les modifications
-        db['properties'][property_id] = property_data
+        for i, prop in enumerate(db['properties']):
+            if prop['id'] == int(property_id):
+                db['properties'][i] = property_data
+                break
         save_database(db)
         
         flash('Annonce mise à jour avec succès!', 'success')
@@ -360,11 +357,15 @@ def delete_property(property_id):
         return redirect(url_for('login'))
     
     db = get_database()
-    if property_id not in db['properties']:
+    for prop in db['properties']:
+        if prop['id'] == int(property_id):
+            property_data = prop
+            break
+    else:
         flash('Propriété non trouvée', 'danger')
         return redirect(url_for('dashboard'))
         
-    if db['properties'][property_id]['owner'] != session['user']:
+    if property_data['owner'] != session['user']:
         flash('Vous n\'avez pas accès à cette propriété', 'danger')
         return redirect(url_for('dashboard'))
     
@@ -379,13 +380,16 @@ def delete_property(property_id):
             os.rmdir(property_folder)
         
         # Supprimer le DPE s'il existe
-        if 'dpe_file' in db['properties'][property_id] and db['properties'][property_id]['dpe_file']:
-            dpe_path = os.path.join('static', db['properties'][property_id]['dpe_file'])
+        if 'dpe_file' in property_data and property_data['dpe_file']:
+            dpe_path = os.path.join('static', property_data['dpe_file'])
             if os.path.exists(dpe_path):
                 os.remove(dpe_path)
         
         # Supprimer de la base de données
-        del db['properties'][property_id]
+        for i, prop in enumerate(db['properties']):
+            if prop['id'] == int(property_id):
+                del db['properties'][i]
+                break
         save_database(db)
         
         flash('Annonce supprimée avec succès', 'success')
@@ -402,11 +406,13 @@ def export_pdf(property_id):
         return redirect(url_for('login'))
     
     db = get_database()
-    if property_id not in db['properties']:
+    for prop in db['properties']:
+        if prop['id'] == int(property_id):
+            property_data = prop
+            break
+    else:
         flash('Propriété non trouvée', 'danger')
         return redirect(url_for('dashboard'))
-    
-    property_data = db['properties'][property_id]
     
     # Vérifier que l'utilisateur est le propriétaire de l'annonce
     if property_data['owner'] != session['user']:
@@ -414,7 +420,11 @@ def export_pdf(property_id):
         return redirect(url_for('dashboard'))
     
     # Générer la carte
-    map_html = generate_map(property_data['address'], property_data['city'], property_data['postal_code'])
+    try:
+        map_html = generate_map(property_data['address'], property_data['city'], property_data['postal_code'])
+    except Exception as e:
+        print(f"Erreur lors de la génération de la carte: {str(e)}")
+        map_html = "<div class='alert alert-warning'>Impossible de générer la carte</div>"
     
     # Créer un environnement Jinja2 pour le template PDF
     env = Environment(loader=FileSystemLoader('templates'))
@@ -460,114 +470,92 @@ def export_pdf(property_id):
 
 @app.route('/api/analyze-image', methods=['POST'])
 def analyze_image():
+    """
+    Endpoint pour analyser une image avec l'API OpenAI Vision
+    """
     if 'image' not in request.files:
-        return jsonify({'error': 'No image provided'}), 400
+        return jsonify({'success': False, 'error': 'No file provided'}), 400
     
     file = request.files['image']
+    
     if file.filename == '':
-        return jsonify({'error': 'No image selected'}), 400
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
     
-    if file and allowed_file(file.filename):
-        # Sauvegarder temporairement l'image
-        filename = secure_filename(file.filename)
-        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_' + filename)
-        file.save(temp_path)
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'error': 'File type not allowed'}), 400
+    
+    try:
+        # Generate a unique ID for this upload
+        upload_id = request.form.get('upload_id', 'no-id')
         
-        # Analyser l'image avec une méthode simplifiée
-        try:
-            # Lire l'image pour l'analyse de base
-            image = cv2.imread(temp_path)
-            if image is None:
-                os.remove(temp_path)
-                return jsonify({'error': 'Impossible de lire l\'image'}), 500
-                
-            height, width, _ = image.shape
-            
-            # Analyse basique de l'image pour les caractéristiques visuelles
-            avg_brightness = np.mean(image)
-            std_dev = np.std(image)
-            
-            # Détection basique d'extérieur vs intérieur
-            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-            # Plage de vert en HSV
-            lower_green = np.array([35, 50, 50])
-            upper_green = np.array([90, 255, 255])
-            # Créer un masque pour le vert
-            mask = cv2.inRange(hsv, lower_green, upper_green)
-            # Calculer le pourcentage de pixels verts
-            green_ratio = np.count_nonzero(mask) / (height * width)
-            
-            # Déterminer le type d'espace
-            if green_ratio > 0.15:  # Si plus de 15% de l'image est verte
-                room_type = 'espace extérieur'
-            else:
-                # Analyse basique des couleurs pour déterminer le type de pièce
-                avg_color = np.mean(image, axis=(0, 1))
-                b, g, r = avg_color
-                
-                # Logique simple pour déterminer le type de pièce
-                if r > 100 and g > 100 and b > 100 and std_dev < 50:
-                    room_type = 'salon'  # Pièces claires et uniformes
-                elif r < 100 and g < 100 and b < 100 and std_dev < 50:
-                    room_type = 'chambre'  # Pièces sombres et uniformes
-                elif std_dev > 60:
-                    room_type = 'cuisine'  # Pièces avec beaucoup de détails
-                else:
-                    room_type = 'pièce'  # Par défaut
-            
-            # Déterminer les caractéristiques
-            features = []
-            
-            # Luminosité
-            if avg_brightness > 150:
-                features.append('lumineux')
-            elif avg_brightness < 80:
-                features.append('intime')
-            
-            # Contraste/Décoration
-            if std_dev > 60:
-                features.append('bien aménagé')
-                
-            # Taille
-            if width * height > 600000:
-                features.append('spacieux')
-            
-            # Générer une description textuelle
-            if room_type in ['espace extérieur', 'jardin', 'parc']:
-                description = f"Cette photo montre un {room_type}"
-            else:
-                description = f"Cette photo montre une {room_type}"
-                
-            if features:
-                description += f" {', '.join(features)}."
-            else:
-                description += "."
-            
-            # Nettoyer le fichier temporaire
-            os.remove(temp_path)
-            
-            # Résultats
-            return jsonify({
-                'room_type': room_type,
-                'features': features,
-                'description': description,
-                'brightness': float(avg_brightness),
-                'std_dev': float(std_dev)
-            })
-            
-        except Exception as e:
-            # Nettoyer le fichier temporaire en cas d'erreur
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            print(f"Erreur lors de l'analyse de l'image: {str(e)}")
-            return jsonify({
-                'room_type': 'pièce',
-                'features': ['non analysé'],
-                'description': "Cette photo montre une pièce de la propriété.",
-                'error': str(e)
-            })
-    
-    return jsonify({'error': 'Invalid file type'}), 400
+        # Create a unique filename to avoid collisions
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S%f")
+        filename = f"image_{timestamp}_{upload_id}.png"
+        
+        # Save the file temporarily
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        print(f"File saved temporarily at: {file_path}")
+        print(f"Form data: {request.form}")
+        
+        # Convert the image to base64
+        with open(file_path, "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        print(f"Processing upload with ID: {upload_id}")
+        print(f"Calling OpenAI Vision API for upload ID: {upload_id}")
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Décrivez cette image de bien immobilier en détail, en français. Concentrez-vous sur les aspects importants pour une annonce immobilière comme: le type de pièce, la luminosité, l'aménagement, l'état général, les équipements visibles, etc."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=300,  # Increased token limit for more detailed descriptions
+        )
+
+        # Get the description from OpenAI
+        description = response.choices[0].message.content
+        print(f"Got description from OpenAI for upload ID {upload_id}: {description[:100]}...")
+
+        # Generate URL for the saved image
+        image_url = url_for('static', filename=f'uploads/{filename}')
+        
+        # We'll keep the file for now (no deletion)
+        
+        return jsonify({
+            'success': True,
+            'description': description,
+            'filename': filename,
+            'url': image_url,
+            'uploadId': upload_id,
+            'room_type': 'Pièce',  # Default room type
+            'features': []  # Empty features array
+        })
+
+    except Exception as api_error:
+        print(f"Error analyzing image: {str(api_error)}")
+        return jsonify({
+            'success': False, 
+            'error': f"Error analyzing image: {str(api_error)}"
+        }), 500
 
 @app.route('/api/generate-description', methods=['POST'])
 def api_generate_description():
@@ -584,7 +572,7 @@ def api_generate_description():
     location = data.get('location', '')
     user_description = data.get('user_description', '')
     
-    # Construire le prompt pour l'API OpenAI
+    # Construire le prompt pour l'IA
     prompt = f"""
     Génère une description professionnelle et attrayante pour une annonce immobilière avec les caractéristiques suivantes:
     - Type de bien: {property_type}
@@ -598,13 +586,13 @@ def api_generate_description():
     Description de base fournie par l'utilisateur:
     {user_description}
     
-    La description doit être détaillée, mettre en valeur les points forts du bien et inciter les acheteurs potentiels à visiter.
-    Utilise un style professionnel mais chaleureux, avec des phrases variées et un vocabulaire riche.
-    La description doit faire environ 150-200 mots.
+    La description doit être détaillée, mettre en valeur les points forts du bien, et utiliser un langage professionnel adapté au secteur immobilier français.
+    Structurez la description en paragraphes avec une introduction, une description des pièces principales, et une conclusion sur l'environnement.
+    Assurez-vous d'inclure et de mentionner explicitement toutes les informations fournies (surface, nombre de pièces, localisation, prix si disponible).
     """
     
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Tu es un agent immobilier expérimenté, spécialisé dans la rédaction de descriptions immobilières attrayantes."},
@@ -667,7 +655,7 @@ def api_generate_title_suggestions():
     """
     
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Tu es un expert en marketing immobilier spécialisé dans la création de titres d'annonces accrocheurs."},
@@ -806,163 +794,31 @@ def nearby_places():
         print(f"Erreur lors de la recherche des points d'intérêt: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-def analyze_property_image(image_path):
-    """
-    Analyser une image de propriété pour en extraire des caractéristiques en utilisant l'API OpenAI Vision
-    """
+@app.route('/api/delete-image', methods=['POST'])
+def delete_image():
+    data = request.json
+    filename = data.get('filename')
+    
+    if not filename:
+        return jsonify({'success': False, 'error': 'No filename provided'}), 400
+    
     try:
-        # Vérifier si l'image existe
-        if not os.path.exists(image_path):
-            return {"error": "Image introuvable"}
+        # Construct the full path to the image
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
-        # Lire l'image pour l'analyse de base
-        image = cv2.imread(image_path)
-        if image is None:
-            return {"error": "Impossible de lire l'image"}
-            
-        height, width, _ = image.shape
-        
-        # Analyse basique de l'image pour les caractéristiques visuelles
-        avg_brightness = np.mean(image)
-        std_dev = np.std(image)
-        
-        # Convertir l'image en base64 pour l'API OpenAI
-        with open(image_path, "rb") as image_file:
-            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-        
-        # Utiliser l'API OpenAI Vision pour analyser l'image
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4-vision-preview",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "Tu es un expert en immobilier spécialisé dans l'analyse d'images de propriétés. Tu dois identifier avec précision le type d'espace montré dans l'image, y compris les espaces extérieurs comme les jardins, parcs, vues extérieures, terrasses, balcons, etc."
-                    },
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "Analyse cette image de propriété immobilière. Identifie précisément le type d'espace (salon, cuisine, chambre, salle de bain, jardin, parc, vue extérieure, terrasse, balcon, entrée, etc.) et décris ses caractéristiques principales (luminosité, verdure, espace, aménagement, etc.). Réponds au format JSON avec les clés 'room_type' et 'features' (liste de 3 caractéristiques maximum)."
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{encoded_image}"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                max_tokens=300
-            )
-            
-            # Extraire la réponse
-            analysis_text = response.choices[0].message.content.strip()
-            
-            # Tenter de parser la réponse JSON
-            try:
-                # Essayer de trouver un objet JSON dans la réponse
-                import re
-                json_match = re.search(r'```json\s*(.*?)\s*```', analysis_text, re.DOTALL)
-                if json_match:
-                    analysis_json = json.loads(json_match.group(1))
-                else:
-                    # Essayer de parser directement
-                    analysis_json = json.loads(analysis_text)
-                
-                room_type = analysis_json.get('room_type', 'indéterminé').lower()
-                features = analysis_json.get('features', [])
-                
-            except Exception as json_error:
-                print(f"Erreur lors du parsing JSON: {str(json_error)}")
-                # Fallback: extraire manuellement les informations
-                room_type = 'indéterminé'
-                features = []
-                
-                # Recherche du type de pièce avec une liste étendue incluant les espaces extérieurs
-                room_types = [
-                    'salon', 'cuisine', 'chambre', 'salle de bain', 'balcon', 'terrasse', 
-                    'entrée', 'jardin', 'parc', 'extérieur', 'vue', 'paysage', 'cour', 
-                    'piscine', 'espace vert'
-                ]
-                
-                for rt in room_types:
-                    if rt in analysis_text.lower():
-                        room_type = rt
-                        break
-                
-                # Si aucun type spécifique n'est trouvé mais qu'il s'agit clairement d'un extérieur
-                if room_type == 'indéterminé' and any(ext in analysis_text.lower() for ext in ['arbre', 'verdure', 'herbe', 'plante', 'ciel', 'nature']):
-                    room_type = 'espace extérieur'
-                
-                # Recherche des caractéristiques
-                feature_keywords = [
-                    'lumineux', 'spacieux', 'moderne', 'décoré', 'rénové', 'équipé',
-                    'verdoyant', 'arboré', 'aménagé', 'ensoleillé', 'ombragé', 'fleuri'
-                ]
-                
-                for kw in feature_keywords:
-                    if kw in analysis_text.lower() and len(features) < 3:
-                        features.append(kw)
-        
-        except Exception as api_error:
-            print(f"Erreur lors de l'appel à l'API OpenAI: {str(api_error)}")
-            # Fallback: utiliser l'analyse basique
-            
-            # Détection basique d'extérieur vs intérieur
-            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-            # Plage de vert en HSV
-            lower_green = np.array([35, 50, 50])
-            upper_green = np.array([90, 255, 255])
-            # Créer un masque pour le vert
-            mask = cv2.inRange(hsv, lower_green, upper_green)
-            # Calculer le pourcentage de pixels verts
-            green_ratio = np.count_nonzero(mask) / (height * width)
-            
-            # Déterminer si c'est un espace extérieur basé sur la quantité de vert
-            if green_ratio > 0.15:  # Si plus de 15% de l'image est verte
-                room_type = 'espace extérieur'
-            else:
-                room_type = 'indéterminé'
-            
-            features = []
-            
-            # Luminosité
-            if avg_brightness > 150:
-                features.append('lumineux')
-            
-            # Contraste/Décoration
-            if std_dev > 60:
-                features.append('bien aménagé')
-                
-            # Taille
-            if width * height > 600000:
-                features.append('spacieux')
-        
-        # Générer une description textuelle
-        if room_type in ['jardin', 'parc', 'espace extérieur', 'extérieur', 'vue', 'paysage', 'cour']:
-            description = f"Cette photo montre un {room_type} {', '.join(features)}."
+        # Check if the file exists
+        if os.path.exists(file_path):
+            # Delete the file
+            os.remove(file_path)
+            print(f"Deleted image: {filename}")
+            return jsonify({'success': True, 'message': 'Image deleted successfully'})
         else:
-            description = f"Cette photo montre une {room_type} {', '.join(features)}."
-        
-        # Résultats
-        return {
-            'room_type': room_type,
-            'features': features,
-            'description': description,
-            'brightness': avg_brightness,
-            'std_dev': std_dev
-        }
+            print(f"Image not found: {filename}")
+            return jsonify({'success': False, 'error': 'Image not found'}), 404
+    
     except Exception as e:
-        print(f"Erreur lors de l'analyse de l'image: {str(e)}")
-        return {
-            'room_type': 'indéterminé',
-            'features': ['non analysé'],
-            'description': "Impossible d'analyser cette image.",
-            'error': str(e)
-        }
+        print(f"Error deleting image {filename}: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def generate_enhanced_description(basic_description, images, property_type, area, rooms, city):
     """
@@ -989,7 +845,7 @@ def generate_enhanced_description(basic_description, images, property_type, area
         """
         
         # Appel à l'API OpenAI avec le nouveau format ChatCompletion
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Vous êtes un expert en immobilier spécialisé dans la rédaction de descriptions professionnelles pour des annonces immobilières."},
