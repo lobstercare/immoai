@@ -1,253 +1,430 @@
-{% extends 'base.html' %}
-
-{% block title %}Oikos - Réinventez votre succès immobilier avec notre propulseur moderne{% endblock %}
-
-{% block content %}
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="hero-title">Réinventez votre succès immobilier avec notre propulseur moderne</h1>
-                <p class="hero-subtitle">Oikos utilise l'intelligence artificielle pour générer des descriptions attrayantes, analyser vos photos et créer des annonces qui se démarquent.</p>
-                <div class="d-flex gap-3">
-                    {% if session.get('user') %}
-                    <a href="{{ url_for('new_property') }}" class="btn btn-primary">Créer une annonce</a>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Mon tableau de bord</a>
-                    {% else %}
-                    <a href="{{ url_for('register') }}" class="btn btn-primary">S'inscrire gratuitement</a>
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-dark">Se connecter</a>
-                    {% endif %}
-                </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAJA - Solution Intelligente pour Agences Immobilières</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="#" class="logo">MAJA</a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#" class="nav-link active">Accueil</a></li>
+                    <li><a href="#features" class="nav-link">Fonctionnalités</a></li>
+                    <li><a href="#testimonials" class="nav-link">Témoignages</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="{{ url_for('login') }}" class="btn btn-outline">Connexion</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Inscription</a>
             </div>
-            <div class="col-lg-6">
-                <div class="building-3d-container">
-                    <img src="{{ url_for('static', filename='img/3d-building.svg') }}" alt="Visualisation 3D du parc immobilier" class="building-3d">
-                    <div class="building-shadow"></div>
-                </div>
-            </div>
+            <button class="mobile-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-    </div>
-</section>
+    </header>
 
-<!-- Features Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center section-heading mb-5">Nos fonctionnalités</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="feature-icon rounded-circle mx-auto mb-4">
-                            <i class="fas fa-magic"></i>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <img src="{{ url_for('static', filename='img/hero-bg.jpg') }}" alt="Espace immobilier moderne" class="hero-bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="hero-content">
+                        <span class="hero-subtitle">Propulsé par l'Intelligence Artificielle</span>
+                        <h1 class="hero-title">Générez des annonces immobilières professionnelles en quelques clics</h1>
+                        <p class="hero-description">Créez des descriptions de propriétés convaincantes et professionnelles avec notre solution alimentée par l'IA. Démarquez-vous sur le marché et attirez plus d'acheteurs potentiels.</p>
+                        <div class="hero-buttons">
+                            <a href="{{ url_for('register') }}" class="btn btn-primary">Commencer</a>
+                            <a href="#features" class="btn-link">En savoir plus <i class="fas fa-arrow-right"></i></a>
                         </div>
-                        <h3 class="card-title h4">Génération IA</h3>
-                        <p class="card-text">Créez des descriptions immobilières professionnelles en quelques secondes grâce à notre intelligence artificielle avancée.</p>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="search-container">
+                        <div class="search-tabs">
+                            <div class="search-tab active">Générer une annonce</div>
+                        </div>
+                        <form class="search-form">
+                            <div class="search-input-group">
+                                <label class="search-label">Type de bien</label>
+                                <select class="search-input">
+                                    <option>Appartement</option>
+                                    <option>Maison</option>
+                                    <option>Villa</option>
+                                    <option>Local commercial</option>
+                                </select>
+                            </div>
+                            <div class="search-input-group">
+                                <label class="search-label">Surface (m²)</label>
+                                <input type="number" class="search-input" placeholder="Ex: 85">
+                            </div>
+                            <div class="search-input-group">
+                                <label class="search-label">Nombre de pièces</label>
+                                <select class="search-input">
+                                    <option>Studio</option>
+                                    <option>2 pièces</option>
+                                    <option>3 pièces</option>
+                                    <option>4 pièces</option>
+                                    <option>5+ pièces</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="search-button">
+                                <i class="fas fa-magic"></i> Générer une annonce
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="feature-icon rounded-circle mx-auto mb-4">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <h3 class="card-title h4">Analyse d'images</h3>
-                        <p class="card-text">Notre système analyse automatiquement vos photos pour mettre en valeur les points forts de chaque propriété.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="feature-icon rounded-circle mx-auto mb-4">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <h3 class="card-title h4">Export PDF</h3>
-                        <p class="card-text">Exportez vos annonces au format PDF pour les partager facilement avec vos clients ou les imprimer.</p>
-                    </div>
-                </div>
-            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- How It Works Section -->
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center section-heading mb-5">Comment ça marche</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="step-circle mx-auto">1</div>
-                    <h3 class="h4">Téléchargez vos photos</h3>
-                    <p>Importez les photos de votre bien immobilier et ajoutez les informations de base.</p>
-                </div>
+    <!-- Featured Properties Section -->
+    <section class="section" id="properties">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Exemples d'annonces</span>
+                <h2 class="section-title">Découvrez nos annonces générées par IA</h2>
+                <p class="section-description">Explorez notre sélection d'annonces immobilières créées avec notre technologie d'intelligence artificielle.</p>
             </div>
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="step-circle mx-auto">2</div>
-                    <h3 class="h4">Notre IA analyse</h3>
-                    <p>Notre intelligence artificielle analyse vos images et génère une description professionnelle.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="step-circle mx-auto">3</div>
-                    <h3 class="h4">Exportez votre annonce</h3>
-                    <p>Personnalisez votre annonce et exportez-la au format PDF ou partagez-la directement.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center section-heading mb-5">Ce que disent nos clients</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="testimonial-stars mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
+            <div class="property-grid">
+                <!-- Property Card 1 -->
+                <div class="property-card fade-in">
+                    <div class="property-image">
+                        <img src="{{ url_for('static', filename='img/property1.jpg') }}" alt="Appartement Luxueux" onerror="this.src='https://via.placeholder.com/600x400?text=Appartement+Luxueux'">
+                        <div class="property-tag">À vendre</div>
+                    </div>
+                    <div class="property-content">
+                        <div class="property-price">450 000 €</div>
+                        <h3 class="property-title">Appartement Luxueux Moderne</h3>
+                        <div class="property-location">
+                            <i class="fas fa-map-marker-alt"></i> Paris 16ème
                         </div>
-                        <p class="card-text">"Oikos a révolutionné notre façon de créer des annonces. Nous gagnons un temps précieux et nos descriptions sont beaucoup plus professionnelles."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="ms-3">
-                                <h5 class="mb-0">Sophie Martin</h5>
-                                <small class="text-muted">Agence Immobilière Parisienne</small>
+                        <div class="property-features">
+                            <div class="property-feature">
+                                <i class="fas fa-bed"></i> 3 chambres
+                            </div>
+                            <div class="property-feature">
+                                <i class="fas fa-bath"></i> 2 salles de bain
+                            </div>
+                            <div class="property-feature">
+                                <i class="fas fa-vector-square"></i> 110 m²
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="testimonial-stars mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="card-text">"Nos annonces se démarquent vraiment depuis que nous utilisons Oikos. Les clients sont impressionnés par la qualité des descriptions."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="ms-3">
-                                <h5 class="mb-0">Thomas Dubois</h5>
-                                <small class="text-muted">Immobilier Côte d'Azur</small>
+                        <div class="property-footer">
+                            <div class="property-agent">
+                                <img src="{{ url_for('static', filename='img/agent1.jpg') }}" alt="Agent" class="agent-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=Agent'">
+                                <span class="agent-name">Jean Dupont</span>
                             </div>
+                            <a href="#" class="property-action">
+                                <i class="far fa-heart"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="testimonial-stars mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+
+                <!-- Property Card 2 -->
+                <div class="property-card fade-in">
+                    <div class="property-image">
+                        <img src="{{ url_for('static', filename='img/property2.jpg') }}" alt="Maison Familiale" onerror="this.src='https://via.placeholder.com/600x400?text=Maison+Familiale'">
+                        <div class="property-tag">À vendre</div>
+                    </div>
+                    <div class="property-content">
+                        <div class="property-price">625 000 €</div>
+                        <h3 class="property-title">Maison Familiale Spacieuse</h3>
+                        <div class="property-location">
+                            <i class="fas fa-map-marker-alt"></i> Lyon, Rhône-Alpes
                         </div>
-                        <p class="card-text">"Un outil indispensable pour tout agent immobilier moderne. La fonction d'export PDF est particulièrement utile pour nos clients."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="ms-3">
-                                <h5 class="mb-0">Marie Leroy</h5>
-                                <small class="text-muted">Agence Lyon Prestige</small>
+                        <div class="property-features">
+                            <div class="property-feature">
+                                <i class="fas fa-bed"></i> 4 chambres
                             </div>
+                            <div class="property-feature">
+                                <i class="fas fa-bath"></i> 3 salles de bain
+                            </div>
+                            <div class="property-feature">
+                                <i class="fas fa-vector-square"></i> 180 m²
+                            </div>
+                        </div>
+                        <div class="property-footer">
+                            <div class="property-agent">
+                                <img src="{{ url_for('static', filename='img/agent2.jpg') }}" alt="Agent" class="agent-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=Agent'">
+                                <span class="agent-name">Marie Laurent</span>
+                            </div>
+                            <a href="#" class="property-action">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 3 -->
+                <div class="property-card fade-in">
+                    <div class="property-image">
+                        <img src="{{ url_for('static', filename='img/property3.jpg') }}" alt="Penthouse Suite" onerror="this.src='https://via.placeholder.com/600x400?text=Penthouse+Suite'">
+                        <div class="property-tag">À vendre</div>
+                    </div>
+                    <div class="property-content">
+                        <div class="property-price">850 000 €</div>
+                        <h3 class="property-title">Penthouse avec Vue Panoramique</h3>
+                        <div class="property-location">
+                            <i class="fas fa-map-marker-alt"></i> Marseille, PACA
+                        </div>
+                        <div class="property-features">
+                            <div class="property-feature">
+                                <i class="fas fa-bed"></i> 4 chambres
+                            </div>
+                            <div class="property-feature">
+                                <i class="fas fa-bath"></i> 3 salles de bain
+                            </div>
+                            <div class="property-feature">
+                                <i class="fas fa-vector-square"></i> 200 m²
+                            </div>
+                        </div>
+                        <div class="property-footer">
+                            <div class="property-agent">
+                                <img src="{{ url_for('static', filename='img/agent3.jpg') }}" alt="Agent" class="agent-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=Agent'">
+                                <span class="agent-name">Sophie Martin</span>
+                            </div>
+                            <a href="#" class="property-action">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="#" class="btn btn-outline">Voir toutes les annonces</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Nos fonctionnalités</span>
+                <h2 class="section-title">Pourquoi choisir MAJA ?</h2>
+                <p class="section-description">Découvrez comment notre plateforme peut transformer votre façon de créer des annonces immobilières.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="feature-title">IA Avancée</h3>
+                    <p class="feature-description">Notre technologie d'intelligence artificielle analyse vos photos et informations pour générer des descriptions captivantes et précises.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">Rapidité</h3>
+                    <p class="feature-description">Créez des annonces professionnelles en quelques minutes au lieu de passer des heures à rédiger des descriptions.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Conversion Améliorée</h3>
+                    <p class="feature-description">Nos annonces optimisées augmentent l'intérêt des acheteurs et améliorent vos taux de conversion.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3 class="feature-title">Analyse de Photos</h3>
+                    <p class="feature-description">Notre IA détecte automatiquement les caractéristiques clés des propriétés à partir de vos photos.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3 class="feature-title">Multilingue</h3>
+                    <p class="feature-description">Générez des descriptions dans plusieurs langues pour atteindre une clientèle internationale.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3 class="feature-title">Export PDF</h3>
+                    <p class="feature-description">Exportez facilement vos annonces au format PDF pour les partager avec vos clients ou les imprimer.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Témoignages</span>
+                <h2 class="section-title">Ce que disent nos clients</h2>
+                <p class="section-description">Découvrez comment MAJA a transformé le travail quotidien des agents immobiliers.</p>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-content">
+                        <p>MAJA a révolutionné notre façon de créer des annonces. Nous gagnons un temps précieux et nos descriptions sont bien plus attrayantes qu'avant.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="{{ url_for('static', filename='img/testimonial1.jpg') }}" alt="Témoignage" class="author-avatar" onerror="this.src='https://via.placeholder.com/50x50?text=T'">
+                        <div class="author-info">
+                            <h4>Pierre Durand</h4>
+                            <p>Directeur, Immobilier Prestige</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-content">
+                        <p>Depuis que nous utilisons MAJA, nos annonces génèrent 40% plus de contacts. L'outil est simple à utiliser et les résultats sont impressionnants.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="{{ url_for('static', filename='img/testimonial2.jpg') }}" alt="Témoignage" class="author-avatar" onerror="this.src='https://via.placeholder.com/50x50?text=T'">
+                        <div class="author-info">
+                            <h4>Isabelle Moreau</h4>
+                            <p>Agente immobilière, Lyon Habitat</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-content">
+                        <p>La qualité des descriptions générées par MAJA est remarquable. Nos clients sont impressionnés par le professionnalisme de nos annonces.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="{{ url_for('static', filename='img/testimonial3.jpg') }}" alt="Témoignage" class="author-avatar" onerror="this.src='https://via.placeholder.com/50x50?text=T'">
+                        <div class="author-info">
+                            <h4>Thomas Leroy</h4>
+                            <p>Fondateur, Agence du Sud</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- CTA Section -->
-<section class="py-5">
+    <!-- Call to Action -->
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <h2 class="section-heading">Prêt à transformer vos annonces immobilières ?</h2>
-                <p class="mb-4">Rejoignez les centaines d'agents immobiliers qui utilisent déjà Oikos pour créer des annonces qui se démarquent.</p>
-                {% if session.get('user') %}
-                <a href="{{ url_for('new_property') }}" class="btn btn-primary btn-lg">Créer ma première annonce</a>
-                {% else %}
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Commencer maintenant</a>
-                {% endif %}
+        <div class="cta">
+            <div class="cta-content">
+                <h2 class="cta-title">Prêt à révolutionner vos annonces immobilières ?</h2>
+                <p class="cta-description">Rejoignez les centaines d'agents immobiliers qui utilisent déjà MAJA pour créer des annonces professionnelles et attrayantes.</p>
+                <div class="cta-buttons">
+                    <a href="{{ url_for('register') }}" class="btn btn-cta">Commencer maintenant</a>
+                    <a href="#contact" class="btn btn-cta-outline">Nous contacter</a>
+                </div>
             </div>
         </div>
     </div>
-</section>
-{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/3d-building.css') }}">
-<style>
-    .feature-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 70px;
-        height: 70px;
-    }
-    
-    .step-circle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    
-    body {
-        font-family: 'Abhaya Libre', sans-serif;
-    }
-    
-    .building-3d-container {
-        position: relative;
-        width: 100%;
-        height: 400px;
-        overflow: hidden;
-    }
-    
-    .building-3d {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .building-shadow {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 50px;
-        background-color: #ccc;
-        border-radius: 50%;
-    }
-</style>
-{% endblock %}
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">MAJA</div>
+                    <p class="footer-description">La solution intelligente pour les agences immobilières qui souhaitent créer des annonces professionnelles rapidement.</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Liens rapides</h4>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">Accueil</a></li>
+                        <li class="footer-link"><a href="#features">Fonctionnalités</a></li>
+                        <li class="footer-link"><a href="#testimonials">Témoignages</a></li>
+                        <li class="footer-link"><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Légal</h4>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">Conditions d'utilisation</a></li>
+                        <li class="footer-link"><a href="#">Politique de confidentialité</a></li>
+                        <li class="footer-link"><a href="#">Mentions légales</a></li>
+                        <li class="footer-link"><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Contact</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <p>123 Avenue des Champs-Élysées, 75008 Paris, France</p>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone contact-icon"></i>
+                        <p>+33 1 23 45 67 89</p>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <p>contact@maja.fr</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MAJA. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
 
-{% block extra_js %}
-<!-- Notre script d'animation SVG -->
-<script src="{{ url_for('static', filename='js/svg-animation.js') }}"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
 
-<script>
-    // Initialiser l'animation SVG lorsque la page est chargée
-    document.addEventListener('DOMContentLoaded', function() {
-        initSVGAnimation('.building-3d');
-    });
-</script>
-{% endblock %}
+        // Mobile menu toggle
+        const mobileToggle = document.querySelector('.mobile-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+        }
+
+        // Animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>

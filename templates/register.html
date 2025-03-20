@@ -1,48 +1,258 @@
 {% extends 'base.html' %}
 
-{% block title %}Inscription - ImmoAI{% endblock %}
+{% block title %}MAJA - Inscription{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern-style.css') }}">
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 5rem 0;
+        background-color: var(--bg-light);
+    }
+    
+    .auth-card {
+        background-color: var(--bg-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    
+    .auth-card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-light);
+    }
+    
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+    }
+    
+    .form-control:focus {
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-btn {
+        background-color: var(--secondary);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: var(--radius-full);
+        transition: var(--transition);
+    }
+    
+    .auth-btn:hover {
+        background-color: var(--secondary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .auth-footer a {
+        color: var(--secondary);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .auth-footer a:hover {
+        color: var(--secondary-light);
+    }
+    
+    .form-text {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .form-check-label a {
+        color: var(--secondary);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .form-check-label a:hover {
+        color: var(--secondary-light);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--secondary);
+        border-color: var(--secondary);
+    }
+    
+    .auth-form {
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-auth {
+        background-color: var(--secondary);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: var(--radius-full);
+        transition: var(--transition);
+        width: 100%;
+    }
+    
+    .btn-auth:hover {
+        background-color: var(--secondary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+    }
+    
+    .auth-divider-line {
+        height: 1px;
+        background-color: var(--border-color);
+        flex: 1;
+    }
+    
+    .auth-divider-text {
+        margin: 0 1rem;
+        color: var(--text-light);
+    }
+    
+    .social-login {
+        margin-top: 1rem;
+    }
+    
+    .social-btn {
+        background-color: var(--bg-white);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        width: 100%;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .social-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    .social-btn:hover {
+        background-color: var(--bg-light);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 my-5">
-                <div class="card-body p-4 p-md-5">
-                    <h2 class="text-center mb-4">Inscription</h2>
-                    <p class="text-center text-muted mb-4">Créez votre compte pour commencer à générer des annonces immobilières professionnelles</p>
-                    
-                    <form method="post" action="{{ url_for('register') }}">
-                        <div class="mb-3">
-                            <label for="agency_name" class="form-label">Nom de l'agence</label>
-                            <input type="text" class="form-control" id="agency_name" name="agency_name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <div class="form-text">Minimum 8 caractères</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirm" class="form-label">Confirmer le mot de passe</label>
-                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
-                            <label class="form-check-label" for="terms">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></label>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
-                        </div>
-                    </form>
-                    
-                    <div class="text-center mt-4">
-                        <p>Vous avez déjà un compte ? <a href="{{ url_for('login') }}">Connectez-vous</a></p>
-                    </div>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <a href="{{ url_for('index') }}" class="auth-logo">MAJA</a>
+            <h1 class="auth-title">Créer un compte</h1>
+            <p class="auth-subtitle">Rejoignez MAJA pour créer des annonces immobilières professionnelles</p>
+        </div>
+        
+        <form class="auth-form" method="post" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="fullname">Nom complet</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" id="fullname" name="fullname" class="form-control" placeholder="Votre nom complet" required>
                 </div>
             </div>
+            
+            <div class="form-group">
+                <label for="agency">Nom de l'agence</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                    <input type="text" id="agency" name="agency" class="form-control" placeholder="Nom de votre agence immobilière" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Votre adresse email professionnelle" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Créez un mot de passe sécurisé" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirmer le mot de passe</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirmez votre mot de passe" required>
+                </div>
+            </div>
+            
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="terms" required>
+                <label class="form-check-label" for="terms">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></label>
+            </div>
+            
+            <button type="submit" class="btn-auth">Créer mon compte</button>
+        </form>
+        
+        <div class="auth-divider">
+            <hr>
+            <span class="auth-divider-text">ou</span>
+            <hr>
+        </div>
+        
+        <div class="social-login">
+            <a href="#" class="social-btn">
+                <i class="fab fa-google"></i> Continuer avec Google
+            </a>
+            <a href="#" class="social-btn">
+                <i class="fab fa-facebook-f"></i> Continuer avec Facebook
+            </a>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Vous avez déjà un compte? <a href="{{ url_for('login') }}">Connectez-vous</a></p>
         </div>
     </div>
 </div>

@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Oikos - Réinventez votre succès immobilier avec notre propulseur moderne{% endblock %}</title>
+    <title>{% block title %}MAJA - Solution Intelligente pour Agences Immobilières{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Google Fonts - Playfair Display & Montserrat -->
+    <!-- Google Fonts - Montserrat & Open Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/logo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark {% if request.path == '/dashboard' %}d-none{% endif %}">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <div class="logo-container">
-                    <span class="logo-text">Oikos<span class="logo-accent"></span></span>
-                    <span class="logo-tagline">Propulseur immobilier</span>
+                    <span class="logo-text">MAJA<span class="logo-accent"></span></span>
+                    <span class="logo-tagline">Propulsé par l'IA</span>
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -90,11 +88,11 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
+    <footer class="bg-light py-4 mt-5 {% if request.path == '/dashboard' %}d-none{% endif %}">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Oikos</h5>
+                    <h5>MAJA</h5>
                     <p>Générateur d'annonces immobilières propulsé par l'intelligence artificielle</p>
                 </div>
                 <div class="col-md-3">
@@ -112,14 +110,14 @@
                 <div class="col-md-3">
                     <h5>Contact</h5>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-envelope me-2"></i>contact@oikos.fr</li>
+                        <li><i class="fas fa-envelope me-2"></i>contact@maja.fr</li>
                         <li><i class="fas fa-phone me-2"></i>+33 1 23 45 67 89</li>
                     </ul>
                 </div>
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; 2025 Oikos. Tous droits réservés.</p>
+                <p>&copy; 2025 MAJA. Tous droits réservés.</p>
             </div>
         </div>
     </footer>

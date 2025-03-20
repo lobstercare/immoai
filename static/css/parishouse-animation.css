@@ -1,0 +1,176 @@
+/* Animation de la maison parisienne */
+
+.parishouse-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.parishouse-image {
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2)) sepia(30%) saturate(150%) brightness(105%);
+    animation: float-house 8s ease-in-out infinite, glow 4s ease-in-out infinite alternate;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease-out, filter 0.5s ease-out;
+}
+
+.parishouse-shadow {
+    position: absolute;
+    bottom: 20px;
+    width: 70%;
+    height: 20px;
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+    border-radius: 50%;
+    filter: blur(5px);
+    z-index: 1;
+    animation: shadow-pulse 8s ease-in-out infinite;
+}
+
+/* Keyframes pour l'animation flottante */
+@keyframes float-house {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-15px) rotate(1deg);
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+    }
+    75% {
+        transform: translateY(-15px) rotate(-1deg);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+/* Keyframes pour l'animation de l'ombre */
+@keyframes shadow-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    25% {
+        transform: scale(0.8);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    75% {
+        transform: scale(0.8);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+}
+
+/* Keyframes pour l'effet de lueur */
+@keyframes glow {
+    0% {
+        filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2)) sepia(30%) saturate(150%) brightness(105%);
+    }
+    100% {
+        filter: drop-shadow(0 20px 40px rgba(255, 193, 7, 0.4)) sepia(40%) saturate(180%) brightness(110%);
+    }
+}
+
+/* Effet au survol */
+.parishouse-image.hover-effect {
+    animation: none;
+    transform: scale(1.05) translateZ(30px);
+    filter: drop-shadow(0 25px 50px rgba(255, 193, 7, 0.5)) sepia(40%) saturate(200%) brightness(110%);
+}
+
+/* Particules décoratives */
+.decoration-particle {
+    position: absolute;
+    background-color: rgba(255, 193, 7, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    animation: float-particle 3s ease-out forwards;
+}
+
+@keyframes float-particle {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-120px) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Éléments décoratifs autour de la maison */
+.house-decoration {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 193, 7, 0.2);
+    filter: blur(3px);
+    z-index: 1;
+}
+
+.decoration-1 {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation: float-decoration 12s ease-in-out infinite;
+}
+
+.decoration-2 {
+    width: 60px;
+    height: 60px;
+    bottom: 30%;
+    right: 15%;
+    animation: float-decoration 10s ease-in-out infinite 1s;
+}
+
+.decoration-3 {
+    width: 40px;
+    height: 40px;
+    top: 60%;
+    left: 20%;
+    animation: float-decoration 8s ease-in-out infinite 2s;
+}
+
+.decoration-4 {
+    width: 30px;
+    height: 30px;
+    top: 30%;
+    right: 25%;
+    animation: float-decoration 6s ease-in-out infinite 3s;
+}
+
+@keyframes float-decoration {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.2;
+    }
+    50% {
+        transform: translateY(-15px) translateX(15px);
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.2;
+    }
+}
