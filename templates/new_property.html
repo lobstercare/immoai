@@ -176,6 +176,33 @@
 </div>
 {% endblock %}
 
+<style>
+    /* Styles for the delete button */
+    .image-delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        opacity: 0.9;
+        transition: all 0.2s;
+    }
+    
+    .image-delete-btn:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+</style>
+
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -183,52 +210,150 @@
         const imageInput = document.getElementById('images');
         const previewContainer = document.getElementById('image-preview-container');
         
-        imageInput.addEventListener('change', function() {
-            // Ne pas réinitialiser le conteneur pour permettre l'ajout de plusieurs photos
-            // previewContainer.innerHTML = '';
+        // Fonction pour traiter un fichier image
+        function processImageFile(file) {
+            // Vérifier si c'est une image
+            if (!file.type.match('image.*')) {
+                alert(`Le fichier "${file.name}" n'est pas une image valide.`);
+                return;
+            }
             
-            if (this.files) {
-                // Afficher toutes les images (pas de limite à 6)
-                Array.from(this.files).forEach((file, index) => {
-                    const reader = new FileReader();
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const card = document.createElement('div');
+                card.className = 'card image-card mb-3 position-relative';
+                
+                // Créer l'élément image
+                const img = document.createElement('img');
+                img.className = 'card-img-top';
+                img.src = e.target.result;
+                card.appendChild(img);
+                
+                // Ajouter le bouton de suppression (X rouge)
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'image-delete-btn';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                card.appendChild(deleteBtn);
+                
+                // Ajouter un gestionnaire d'événements pour le bouton de suppression
+                deleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     
-                    reader.onload = function(e) {
-                        const card = document.createElement('div');
-                        card.className = 'col-md-4 mb-3';
-                        card.innerHTML = `
-                            <div class="card position-relative">
-                                <img src="${e.target.result}" class="card-img-top" alt="Aperçu de l'image">
-                                <div class="card-body p-2">
-                                    <div class="small text-muted">${file.name}</div>
-                                    <div class="analysis-status mt-1">
-                                        <div class="d-flex align-items-center">
-                                            <div class="spinner-border spinner-border-sm me-2" role="status">
-                                                <span class="visually-hidden">Analyse en cours...</span>
-                                            </div>
-                                            <span class="small">Analyse en cours...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-image">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        `;
-                        
-                        previewContainer.appendChild(card);
-                        
-                        // Ajouter un gestionnaire d'événements pour supprimer l'image
-                        card.querySelector('.remove-image').addEventListener('click', function() {
+                    if (confirm('Voulez-vous vraiment supprimer cette image ?')) {
+                        // Si l'image a un nom de fichier stocké, supprimer du serveur
+                        if (card.dataset.filename) {
+                            fetch('/api/delete-image', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ filename: card.dataset.filename })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Delete response:', data);
+                                if (data.success) {
+                                    card.remove();
+                                } else {
+                                    alert("Erreur lors de la suppression de l'image: " + (data.error || 'Erreur inconnue'));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting image:', error);
+                                alert("Erreur lors de la suppression de l'image");
+                            });
+                        } else {
+                            // Si l'image n'a pas encore été sauvegardée sur le serveur, simplement supprimer de l'UI
                             card.remove();
-                        });
-                        
-                        // Analyser l'image avec l'IA
-                        const analysisStatus = card.querySelector('.analysis-status');
-                        analyzeImage(file, card, analysisStatus);
-                    };
-                    
-                    reader.readAsDataURL(file);
+                        }
+                    }
                 });
+                
+                // Créer le corps de la carte
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body p-2';
+                
+                // Ajouter un indicateur d'état pour l'analyse
+                const analysisStatus = document.createElement('div');
+                analysisStatus.className = 'analysis-status small';
+                analysisStatus.innerHTML = '<div class="text-primary"><i class="fas fa-spinner fa-spin me-1"></i> Analyse en cours...</div>';
+                cardBody.appendChild(analysisStatus);
+                
+                card.appendChild(cardBody);
+                
+                previewContainer.appendChild(card);
+                
+                // Analyser l'image avec l'IA
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                // Ajouter une image à la liste des images à envoyer
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'image_list[]';
+                hiddenInput.value = file.name;
+                document.getElementById('propertyForm').appendChild(hiddenInput);
+                
+                // Faire la requête sans timeout
+                fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Image analysis response:', data);
+                    
+                    // Store the filename for deletion
+                    if (data.filename) {
+                        card.dataset.filename = data.filename;
+                    }
+                    
+                    // Créer un badge pour le type de pièce
+                    const badge = document.createElement('div');
+                    badge.className = 'position-absolute top-0 start-0 m-2 badge bg-primary';
+                    badge.textContent = data.room_type || 'Non identifié';
+                    card.appendChild(badge);
+                    
+                    // Afficher les caractéristiques
+                    let featuresHtml = '';
+                    if (data.features && data.features.length > 0) {
+                        featuresHtml = data.features.map(f => `<span class="badge bg-light text-dark me-1">${f}</span>`).join('');
+                    }
+                    
+                    // Afficher la description
+                    analysisStatus.innerHTML = `
+                        <div class="mt-1">
+                            <div class="small text-success mb-1"><i class="fas fa-check-circle me-1"></i> Analyse terminée</div>
+                            <div class="small text-muted">${data.description || 'Aucune description disponible'}</div>
+                            <div class="mt-1">${featuresHtml}</div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    analysisStatus.innerHTML = `
+                        <div class="mt-1">
+                            <div class="small text-warning mb-1"><i class="fas fa-exclamation-triangle me-1"></i> Analyse partielle</div>
+                            <div class="small text-muted">L'image sera utilisée mais n'a pas pu être analysée complètement.</div>
+                        </div>
+                    `;
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Gérer l'événement de changement du champ de fichier
+        imageInput.addEventListener('change', function() {
+            // Vérifier s'il y a des fichiers sélectionnés
+            if (this.files && this.files.length > 0) {
+                // Créer une copie des fichiers pour éviter les problèmes avec FileList
+                const selectedFiles = Array.from(this.files);
+                
+                // Traiter chaque fichier individuellement
+                selectedFiles.forEach(processImageFile);
                 
                 // Réinitialiser l'input pour permettre de sélectionner à nouveau les mêmes fichiers
                 imageInput.value = '';
@@ -305,65 +430,6 @@
                 generateDescriptionBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Générer une description avec l\'IA';
             });
         });
-        
-        // Fonction pour analyser une image
-        function analyzeImage(file, card, analysisStatus) {
-            const formData = new FormData();
-            formData.append('image', file);
-            
-            // Ajouter une image à la liste des images à envoyer
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'image_list[]';
-            hiddenInput.value = file.name;
-            document.getElementById('propertyForm').appendChild(hiddenInput);
-            
-            // Définir un timeout pour l'analyse
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout')), 10000); // 10 secondes timeout
-            });
-            
-            // Faire la requête avec un timeout
-            Promise.race([
-                fetch('/api/analyze-image', {
-                    method: 'POST',
-                    body: formData
-                }),
-                timeoutPromise
-            ])
-            .then(response => response.json())
-            .then(data => {
-                // Créer un badge pour le type de pièce
-                const badge = document.createElement('div');
-                badge.className = 'position-absolute top-0 start-0 m-2 badge bg-primary';
-                badge.textContent = data.room_type || 'Non identifié';
-                card.appendChild(badge);
-                
-                // Afficher les caractéristiques
-                let featuresHtml = '';
-                if (data.features && data.features.length > 0) {
-                    featuresHtml = data.features.map(f => `<span class="badge bg-light text-dark me-1">${f}</span>`).join('');
-                }
-                
-                // Afficher la description
-                analysisStatus.innerHTML = `
-                    <div class="mt-1">
-                        <div class="small text-success mb-1"><i class="fas fa-check-circle me-1"></i> Analyse terminée</div>
-                        <div class="small text-muted">${data.description || 'Aucune description disponible'}</div>
-                        <div class="mt-1">${featuresHtml}</div>
-                    </div>
-                `;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                analysisStatus.innerHTML = `
-                    <div class="mt-1">
-                        <div class="small text-warning mb-1"><i class="fas fa-exclamation-triangle me-1"></i> Analyse partielle</div>
-                        <div class="small text-muted">L'image sera utilisée mais n'a pas pu être analysée complètement.</div>
-                    </div>
-                `;
-            });
-        }
         
         // Suggestions de titres
         const suggestTitlesBtn = document.getElementById('suggest-titles');
