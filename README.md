@@ -1,4 +1,4 @@
-# ImmoAI - Générateur d'Annonces Immobilières avec IA
+# Maja - Générateur d'Annonces Immobilières avec IA
 
 ImmoAI est une plateforme web qui permet aux agences immobilières françaises de générer des annonces professionnelles à partir d'images et d'informations de base sur les biens immobiliers. L'application utilise l'intelligence artificielle pour analyser les images, générer des descriptions attrayantes et créer des annonces complètes incluant des cartes interactives.
 
