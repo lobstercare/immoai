@@ -3,7 +3,7 @@
 {% block title %}{{ property.title }} - ImmoAI{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" data-property-id="{{ property.id }}">
     <div class="mb-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -11,6 +11,18 @@
                 <li class="breadcrumb-item active" aria-current="page">Aperçu de l'annonce</li>
             </ol>
         </nav>
+    </div>
+
+    <!-- Toast de succès -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                    Description mise à jour avec succès
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
@@ -41,19 +53,36 @@
     <div class="row">
         <div class="col-lg-8">
             <!-- Carousel d'images -->
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Photos</h2>
+                </div>
                 <div class="card-body p-0">
-                    {% if property.images %}
+                    {% if property.images and property.images|length > 0 %}
                     <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-indicators">
                             {% for image in property.images %}
-                            <button type="button" data-bs-target="#propertyCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
+                            <button type="button" data-bs-target="#propertyCarousel" data-bs-slide-to="{{ loop.index0 }}" 
+                                    {% if loop.first %}class="active" aria-current="true"{% endif %} 
+                                    aria-label="Slide {{ loop.index }}"></button>
                             {% endfor %}
                         </div>
                         <div class="carousel-inner">
                             {% for image in property.images %}
                             <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <img src="/{{ image }}" class="d-block w-100" alt="Photo du bien" style="height: 500px; object-fit: cover;">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('serve_uploads', filename=image.path if image is mapping else image) }}" class="d-block w-100 property-image" 
+                                         alt="Photo du bien" style="height: 500px; object-fit: cover; cursor: pointer;"
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                         data-image-src="{{ url_for('serve_uploads', filename=image.path if image is mapping else image) }}"
+                                         data-image-index="{{ loop.index0 }}"
+                                         data-image-description="{{ image.description if image is mapping and image.description else 'Aucune description disponible' }}">
+                                    <div class="position-absolute bottom-0 end-0 m-3">
+                                        <span class="badge bg-primary rounded-pill">
+                                            <i class="fas fa-info-circle"></i> Cliquez pour plus de détails
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             {% endfor %}
                         </div>
@@ -69,7 +98,7 @@
                     {% else %}
                     <div class="text-center p-5 bg-light">
                         <i class="fas fa-image fa-4x text-muted mb-3"></i>
-                        <p>Aucune image disponible</p>
+                        <p class="mb-0">Aucune image disponible</p>
                     </div>
                     {% endif %}
                 </div>
@@ -209,12 +238,9 @@
                 </div>
                 <div class="card-body">
                     {% if property.dpe_file %}
-                    <img src="{{ url_for('static', filename=property.dpe_file) }}" class="img-fluid" alt="Diagnostic de Performance Énergétique">
+                    <img src="{{ url_for('serve_uploads', filename=property.dpe_file) }}" class="img-fluid" alt="Diagnostic de Performance Énergétique">
                     {% else %}
-                    <div class="text-center p-4 bg-light rounded">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
                         <p>DPE non disponible</p>
-                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -294,11 +320,14 @@
             nearbyEmpty.classList.add('d-none');
             
             // Données de la propriété
+            const container = document.querySelector('.container');
+            const propertyId = container.getAttribute('data-property-id');
             const propertyData = {
                 address: "{{ property.address }}",
                 city: "{{ property.city }}",
                 postal_code: "{{ property.postal_code }}",
-                type: type
+                type: type,
+                property_id: propertyId
             };
             
             // Appel à l'API
@@ -309,8 +338,8 @@
                 },
                 body: JSON.stringify(propertyData)
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
                 // Masquer le chargement
                 nearbyLoading.classList.add('d-none');
                 
@@ -337,7 +366,7 @@
                     nearbyEmpty.classList.remove('d-none');
                 }
             })
-            .catch(error => {
+            .catch(function(error) {
                 console.error('Error:', error);
                 nearbyLoading.classList.add('d-none');
                 nearbyEmpty.classList.remove('d-none');
@@ -363,8 +392,172 @@
             loadNearbyPlaces('ecole');
         });
     });
+    
+    // Initialisation des variables
+    let currentImageIndex = 0;
+    const propertyImages = document.querySelectorAll('.property-image');
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalDescription = document.getElementById('descriptionText');
+    const modalPrev = document.getElementById('modalPrev');
+    const modalNext = document.getElementById('modalNext');
+    const editDescriptionBtn = document.getElementById('editDescriptionBtn');
+    const descriptionEditFooter = document.getElementById('descriptionEditFooter');
+    const descriptionInput = document.getElementById('descriptionInput');
+    const saveDescriptionBtn = document.getElementById('saveDescriptionBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    
+    // Nombre total d'images
+    const totalImages = propertyImages.length;
+    
+    // Fonction pour mettre à jour l'image modale
+    function updateModalImage(index) {
+        currentImageIndex = index;
+        const imageSrc = propertyImages[index].getAttribute('data-image-src');
+        const imageDescription = propertyImages[index].getAttribute('data-image-description');
+        
+        modalImage.src = imageSrc;
+        modalDescription.textContent = imageDescription || 'Aucune description disponible';
+        
+        // Mise à jour des boutons de navigation
+        modalPrev.style.display = index === 0 ? 'none' : 'block';
+        modalNext.style.display = index === totalImages - 1 ? 'none' : 'block';
+        
+        // Réinitialiser l'interface d'édition
+        if (descriptionEditFooter) {
+            descriptionEditFooter.style.display = 'none';
+        }
+    }
+    
+    // Ajouter des écouteurs d'événements aux images
+    propertyImages.forEach((image, index) => {
+        image.addEventListener('click', function() {
+            updateModalImage(index);
+        });
+    });
+    
+    // Navigation dans le modal
+    modalPrev?.addEventListener('click', () => {
+        if (currentImageIndex > 0) updateModalImage(currentImageIndex - 1);
+    });
+    
+    modalNext?.addEventListener('click', () => {
+        if (currentImageIndex < totalImages - 1) updateModalImage(currentImageIndex + 1);
+    });
+    
+    // Édition de la description (pour les propriétaires uniquement)
+    editDescriptionBtn?.addEventListener('click', () => {
+        descriptionEditFooter.style.display = 'block';
+        descriptionInput.value = modalDescription.textContent;
+        descriptionInput.focus();
+    });
+    
+    saveDescriptionBtn?.addEventListener('click', () => {
+        const newDescription = descriptionInput.value.trim();
+        modalDescription.textContent = newDescription || 'Aucune description disponible';
+        descriptionEditFooter.style.display = 'none';
+        
+        // Mise à jour de la description via API
+        const container = document.querySelector('.container');
+        const propertyId = container.getAttribute('data-property-id');
+        
+        fetch('/api/update-description', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                property_id: propertyId,
+                image_index: currentImageIndex,
+                description: newDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mettre à jour l'attribut de l'image dans le carrousel
+                propertyImages[currentImageIndex].setAttribute('data-image-description', newDescription);
+                
+                // Notification de succès
+                const toast = new bootstrap.Toast(document.getElementById('successToast'));
+                document.getElementById('toastMessage').textContent = 'Description mise à jour avec succès';
+                toast.show();
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la mise à jour de la description');
+        });
+    });
+    
+    cancelEditBtn?.addEventListener('click', () => {
+        descriptionInput.value = '';
+        descriptionEditFooter.style.display = 'none';
+    });
+    
+    // Navigation au clavier
+    imageModal.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && currentImageIndex > 0) {
+            updateModalImage(currentImageIndex - 1);
+        } else if (e.key === 'ArrowRight' && currentImageIndex < totalImages - 1) {
+            updateModalImage(currentImageIndex + 1);
+        }
+    });
 </script>
 {% endblock %}
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">{{ property.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 position-relative">
+                <div class="row g-0">
+                    <div class="col-md-9">
+                        <img id="modalImage" src="" class="img-fluid w-100" alt="Photo du bien" style="max-height: 80vh; object-fit: contain;">
+                    </div>
+                    <div class="col-md-3 bg-light">
+                        <div class="p-3">
+                            <h6 class="border-bottom pb-2 mb-3">Description de l'image</h6>
+                            <div id="descriptionText" class="mb-3">Description de l'image...</div>
+                            
+                            {% if is_owner %}
+                            <div class="mt-3">
+                                <button id="editDescriptionBtn" class="btn btn-sm btn-primary w-100">
+                                    <i class="fas fa-edit me-1"></i> Modifier la description
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="position-absolute top-50 start-0 translate-middle-y">
+                    <button id="modalPrev" class="btn btn-dark btn-sm rounded-circle ms-2" style="opacity: 0.7;">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <div class="position-absolute top-50 end-0 translate-middle-y">
+                    <button id="modalNext" class="btn btn-dark btn-sm rounded-circle me-2" style="opacity: 0.7;">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            {% if is_owner %}
+            <div class="modal-footer" id="descriptionEditFooter" style="display: none;">
+                <div class="input-group">
+                    <input type="text" id="descriptionInput" class="form-control" placeholder="Description de l'image">
+                    <button class="btn btn-primary" id="saveDescriptionBtn">Enregistrer</button>
+                    <button class="btn btn-secondary" id="cancelEditBtn">Annuler</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
 <!-- Modal de suppression -->
 {% if is_owner %}
